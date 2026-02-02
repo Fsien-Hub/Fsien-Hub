@@ -1,253 +1,190 @@
--- Fsien Hub | Pure Soccer Özel - Geliştirilmiş Versiyon (2026)
--- Reach, TP Ball, Magnet, Stamina, Shoot + Ekstra: Reach Box, Ball ESP, Infinite Jump, Speed Slider
+-- Fsien Hub | Pure Soccer - Yeniden Açılabilir UI + Stabil Fix (2026)
+-- Hotkey: RightShift ile aç/kapa | UI kapatınca destroy olur
 
 local PlaceId = game.PlaceId
 if PlaceId ~= 88920112778598 then
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "Fsien Hub Hata",
-        Text = "Bu script sadece Pure Soccer için! (PlaceId: 88920112778598)",
-        Duration = 6
-    })
+    warn("[Fsien Hub] Yanlış oyun! Sadece Pure Soccer.")
     return
 end
 
-print("Fsien Hub - Pure Soccer Yükleniyor... (Geliştirilmiş Versiyon)")
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = Players.LocalPlayer
 
--- UI
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("Fsien Hub | Pure Soccer ⚽", "DarkTheme")  -- Tema: Ocean, Sentinel, Midnight vs. dene
+local Library = nil
+local Window = nil
+local GuiOpen = false
 
-local Tab_Main = Window:NewTab("Ana Özellikler")
-local Sec_Main = Tab_Main:NewSection("Temel Hileler - Ban Riski Düşük Tut")
-
--- Değişkenler
-local ReachEnabled = false
-local ReachSize = 12       -- Başlangıç güvenli (10-18 arası öneri)
-local OriginalSizes = {}   -- Reset için orijinal boyutları sakla
-local BallMagnet = false
-local InfiniteStamina = false
-local InfiniteJump = false
-local WalkSpeed = 16       -- Varsayılan Roblox
-local ReachBoxEnabled = false
-local BallESPEnabled = false
-
--- Yardımcı Fonksiyon: Ball'ı daha iyi bul (genelde "Ball" adında, büyük Part)
-local function GetBall()
-    for _, obj in ipairs(workspace:GetChildren()) do
-        if obj:IsA("BasePart") and obj.Name == "Ball" and obj.Size.Magnitude > 8 then  -- Boyut filtre
-            return obj
+-- UI'yi yükle/yok et fonksiyonu
+local function LoadUI()
+    if GuiOpen then return end  -- Zaten açıksa tekrarlama
+    
+    Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+    Window = Library.CreateLib("Fsien Hub | Pure Soccer ⚽", "DarkTheme")  -- Tema değiştir: Ocean, Midnight, Sentinel vs.
+    
+    local Tab = Window:NewTab("Ana Özellikler")
+    local Sec = Tab:NewSection("Reach & Ball Kontrolü (Maçta Dene)")
+    
+    -- Debug Label
+    Tab:NewLabel("Durum: Maç başlasın diye bekleniyor...")
+    Tab:NewLabel("Ban Riski: Reach >18 & Velocity >40 ↑")
+    
+    -- Değişkenler
+    local ReachEnabled = false
+    local ReachSize = 12
+    local OriginalSizes = {}
+    local BallMagnet = false
+    
+    -- Ball Bulma (daha akıllı)
+    local function GetBall()
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            local nameLower = obj.Name:lower()
+            if obj:IsA("BasePart") and (nameLower:find("ball") or nameLower:find("soccer") or nameLower:find("football")) then
+                if obj.Size.Magnitude > 5 and obj:IsDescendantOf(workspace) then
+                    print("[DEBUG] Ball tespit edildi: " .. obj:GetFullName())
+                    return obj
+                end
+            end
         end
+        print("[DEBUG] Ball yok - Maç başlamadı mı?")
+        return nil
     end
-    return nil  -- Bulamazsa nil
-end
-
--- Reach Toggle
-Sec_Main:NewToggle("Reach Aktif", "Topa ekstra ulaş (düşük tut ban riski azalır)", function(state)
-    ReachEnabled = state
-    local player = game.Players.LocalPlayer
-    local char = player.Character
-    if not char then return end
-
-    if state then
-        -- Orijinal boyutları kaydet (ilk seferde)
-        if next(OriginalSizes) == nil then
+    
+    -- Reach Toggle
+    Sec:NewToggle("Reach Aktif", "Düşük tut (12-16 öneri)", function(state)
+        ReachEnabled = state
+        local char = LocalPlayer.Character
+        if not char then return end
+        
+        if state then
+            OriginalSizes = {}
             for _, part in ipairs(char:GetChildren()) do
                 if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                    OriginalSizes[part.Name] = part.Size
+                    OriginalSizes[part] = part.Size
                 end
             end
-        end
-
-        spawn(function()
-            while ReachEnabled and char.Parent do
-                task.wait(0.15)  -- Lag önleme
-                pcall(function()
-                    for _, part in ipairs(char:GetChildren()) do
-                        if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                            part.Size = Vector3.new(ReachSize, ReachSize, ReachSize)
-                            part.Transparency = 0.88  -- Neredeyse görünmez
-                            part.CanCollide = false
+            
+            spawn(function()
+                while ReachEnabled and char.Parent do
+                    task.wait(0.2)
+                    pcall(function()
+                        for part, _ in pairs(OriginalSizes) do
+                            if part.Parent then
+                                part.Size = Vector3.new(ReachSize, ReachSize, ReachSize)
+                                part.Transparency = 0.92
+                                part.CanCollide = false
+                            end
                         end
-                    end
-                end)
-            end
-        end)
-    else
-        -- Reset
-        pcall(function()
-            for _, part in ipairs(char:GetChildren()) do
-                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" and OriginalSizes[part.Name] then
-                    part.Size = OriginalSizes[part.Name]
-                    part.Transparency = 0
-                    part.CanCollide = true
-                end
-            end
-        end)
-    end
-end)
-
-Sec_Main:NewSlider("Reach Boyutu", "8-25 arası (20+ ban riski ↑)", 180, 8, function(value)
-    ReachSize = value / 10
-end)
-
--- Reach Box (görsel kutu - ban riski biraz artırır)
-Sec_Main:NewToggle("Reach Box Göster (Kırmızı)", "Reach alanını gör", function(state)
-    ReachBoxEnabled = state
-    local player = game.Players.LocalPlayer
-    spawn(function()
-        while ReachBoxEnabled do
-            task.wait(0.2)
-            pcall(function()
-                local char = player.Character
-                if char and char:FindFirstChild("HumanoidRootPart") then
-                    local root = char.HumanoidRootPart
-                    local box = root:FindFirstChild("ReachBox")
-                    if not box then
-                        box = Instance.new("BoxHandleAdornment")
-                        box.Name = "ReachBox"
-                        box.Adornee = root
-                        box.Size = Vector3.new(ReachSize*2, ReachSize*2, ReachSize*2)
-                        box.Color3 = Color3.fromRGB(255, 0, 0)
-                        box.Transparency = 0.6
-                        box.AlwaysOnTop = true
-                        box.ZIndex = 10
-                        box.Parent = root
-                    end
-                    box.Size = Vector3.new(ReachSize*2, ReachSize*2, ReachSize*2)
+                    end)
                 end
             end)
-        end
-        -- Kapatınca sil
-        pcall(function()
-            local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if root then
-                local box = root:FindFirstChild("ReachBox")
-                if box then box:Destroy() end
-            end
-        end)
-    end)
-end)
-
--- Ball Magnet
-Sec_Main:NewToggle("Ball Magnet", "Top sana doğru gelsin", function(state)
-    BallMagnet = state
-    if state then
-        spawn(function()
-            while BallMagnet do
-                task.wait(0.08)
-                pcall(function()
-                    local ball = GetBall()
-                    local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    if ball and hrp then
-                        local dir = (hrp.Position - ball.Position).Unit
-                        ball.Velocity = dir * 30  -- 30 hız güvenli, 50+ kick riski
-                    end
-                end)
-            end
-        end)
-    end
-end)
-
--- Topa TP
-Sec_Main:NewButton("Topa Işınlan", "Anında topa git", function()
-    pcall(function()
-        local ball = GetBall()
-        local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if ball and hrp then
-            hrp.CFrame = ball.CFrame + Vector3.new(0, 5, 0)  -- Üstüne çık
-        end
-    end)
-end)
-
--- Infinite Stamina + Speed Slider
-Sec_Main:NewToggle("Infinite Stamina + Hız", "Enerji bitmez + hız", function(state)
-    InfiniteStamina = state
-    local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-    if hum then
-        if state then
-            hum.WalkSpeed = WalkSpeed
         else
-            hum.WalkSpeed = 16
-        end
-    end
-end)
-
-Sec_Main:NewSlider("Yürüme Hızı", "16-40 arası", 240, 16, function(value)
-    WalkSpeed = value
-    local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-    if hum and InfiniteStamina then
-        hum.WalkSpeed = value
-    end
-end)
-
--- Infinite Jump
-Sec_Main:NewToggle("Infinite Jump", "Sonsuz zıpla (Space)", function(state)
-    InfiniteJump = state
-    if state then
-        local conn
-        conn = game:GetService("UserInputService").JumpRequest:Connect(function()
-            if InfiniteJump then
-                local hum = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
-                if hum then hum:ChangeState("Jumping") end
-            end
-        end)
-        -- Bağlantıyı kapatmak için (toggle off)
-        spawn(function()
-            while InfiniteJump do task.wait(1) end
-            conn:Disconnect()
-        end)
-    end
-end)
-
--- Ball ESP (highlight)
-Sec_Main:NewToggle("Ball ESP", "Topu duvar arkasından gör", function(state)
-    BallESPEnabled = state
-    spawn(function()
-        while BallESPEnabled do
-            task.wait(0.5)
             pcall(function()
-                local ball = GetBall()
-                if ball then
-                    local hl = ball:FindFirstChild("BallESP")
-                    if not hl then
-                        hl = Instance.new("Highlight")
-                        hl.Name = "BallESP"
-                        hl.FillColor = Color3.fromRGB(255, 215, 0)
-                        hl.OutlineColor = Color3.fromRGB(255, 0, 0)
-                        hl.FillTransparency = 0.4
-                        hl.OutlineTransparency = 0
-                        hl.Parent = ball
+                for part, orig in pairs(OriginalSizes) do
+                    if part.Parent then
+                        part.Size = orig
+                        part.Transparency = 0
+                        part.CanCollide = true
                     end
                 end
             end)
         end
-        -- Kapat
+    end)
+    
+    Sec:NewSlider("Reach Boyutu", "8-20", 130, 8, function(value)
+        ReachSize = value / 10
+    end)
+    
+    -- Ball Magnet
+    Sec:NewToggle("Ball Magnet", "Top yavaşça sana gelsin", function(state)
+        BallMagnet = state
+        if state then
+            spawn(function()
+                while BallMagnet do
+                    task.wait(0.12)
+                    pcall(function()
+                        local ball = GetBall()
+                        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if ball and hrp then
+                            local dir = (hrp.Position - ball.Position).Unit
+                            ball.Velocity = dir * 25  -- Düşük hız = düşük ban riski
+                        end
+                    end)
+                end
+            end)
+        end
+    end)
+    
+    -- Tp to Ball
+    Sec:NewButton("Topa Işınlan", "", function()
         pcall(function()
             local ball = GetBall()
-            if ball then
-                local hl = ball:FindFirstChild("BallESP")
-                if hl then hl:Destroy() end
+            local hrp = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if ball and hrp then
+                hrp.CFrame = ball.CFrame + Vector3.new(0, 5, 0)
             end
         end)
     end)
-end)
-
--- Basit Auto Shoot (önüne vur)
-Sec_Main:NewButton("Hızlı Vuruş (Shoot)", "Önüne doğru vur", function()
-    pcall(function()
-        local ball = GetBall()
-        local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if ball and hrp then
-            ball.Velocity = hrp.CFrame.LookVector * 60 + Vector3.new(0, 25, 0)  -- İleri + yukarı
-        end
+    
+    -- Infinite Stamina (basit hız)
+    Sec:NewToggle("Infinite Stamina", "Koşu bitmesin", function(state)
+        spawn(function()
+            while state do
+                task.wait(0.3)
+                pcall(function()
+                    local hum = LocalPlayer.Character:FindFirstChild("Humanoid")
+                    if hum then hum.WalkSpeed = 22 end
+                end)
+            end
+        end)
     end)
+    
+    GuiOpen = true
+    StarterGui:SetCore("SendNotification", {Title = "Fsien Hub", Text = "UI Açıldı! RightShift ile kapat/aç", Duration = 5})
+end
+
+local function UnloadUI()
+    if not GuiOpen then return end
+    if Window then
+        pcall(function()
+            Window:Destroy()  -- Kavo'da destroy çağrısı
+        end)
+    end
+    Library = nil
+    Window = nil
+    GuiOpen = false
+    StarterGui:SetCore("SendNotification", {Title = "Fsien Hub", Text = "UI Kapatıldı", Duration = 3})
+end
+
+-- Hotkey: RightShift ile toggle
+UserInputService.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    if input.KeyCode == Enum.KeyCode.RightShift then
+        if GuiOpen then
+            UnloadUI()
+        else
+            LoadUI()
+        end
+    end
 end)
 
--- Bilgi Label
-Tab_Main:NewSection("Notlar & Uyarılar")
-Tab_Main:NewLabel("Ban Riski: Reach >20, Velocity >70, spam yapma")
-Tab_Main:NewLabel("Private server'da test et")
-Tab_Main:NewLabel("Executor: Delta/Fluxus önerilir")
-Tab_Main:NewLabel("Güncel: Şubat 2026 - Anti-cheat orta seviye")
+-- İlk yükleme (otomatik aç)
+LoadUI()
 
-print("Fsien Hub yüklendi! Özellikleri dene, keyifli oyunlar ⚽")
+-- Karakter yenilenince reach reset (otomatik)
+LocalPlayer.CharacterAdded:Connect(function(char)
+    wait(1)  -- Karakter tam yüklenene kadar bekle
+    if ReachEnabled then
+        -- Reach'i yeniden uygula
+        for _, part in ipairs(char:GetChildren()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Size = Vector3.new(ReachSize, ReachSize, ReachSize)
+                part.Transparency = 0.92
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+print("[Fsien Hub] Yüklendi! RightShift ile UI aç/kapa. Maçta dene.")
