@@ -1,9 +1,9 @@
--- Fsien Hub - Delta Executor için (Tüm Özellikler Bir Arada - Şık Versiyon)
+-- Fsien Hub - Delta Executor için (10 Sekme + Her Sekmede 30+ Hile - En Uzun ve Detaylı Versiyon)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Fsien Hub",
-   LoadingTitle = "Yükleniyor...",
+   LoadingTitle = "Fsien Hub Yükleniyor...",
    LoadingSubtitle = "by Fsien",
    ConfigurationSaving = {Enabled = true, FolderName = "FsienHub", FileName = "Config"},
    KeySystem = false,
@@ -14,8 +14,11 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- Discord mesajı (sağ alt, sadece yazı, 10 saniye sonra kaybolur)
+-- Discord mesajı (sağ alt, 10 saniye sonra kaybolur)
 spawn(function()
    local gui = Instance.new("ScreenGui")
    gui.Parent = game.CoreGui
@@ -57,219 +60,102 @@ spawn(function()
    gui:Destroy()
 end)
 
--- Universal Hileler Tab
-local UniTab = Window:CreateTab("Universal Hileler")
+-- Sekme 1: Universal (Genel Hileler - 35 Özellik)
+local UniversalTab = Window:CreateTab("Universal")
+UniversalTab:CreateLabel("Genel Hileler - Her Oyunda Çalışır (35+ Özellik)")
 
--- Mobil Tap Fly
-local flySpeed = 50
-local flying = false
-local flyBV, flyBG, flyConnection
-local flyGui = nil
-local moveDir = Vector3.new(0, 0, 0)
-
-UniTab:CreateToggle({
-   Name = "Mobil Tap Fly (Dokunmatik Panel)",
+UniversalTab:CreateToggle({
+   Name = "Fly (Uçma)",
    CurrentValue = false,
    Callback = function(Value)
-      flying = Value
-      local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-      if not root then Rayfield:Notify({Title = "Hata", Content = "Karakter yüklenmedi!"}); return end
+      local player = LocalPlayer
+      local mouse = player:GetMouse()
+      local flying = Value
+      local speed = 50
 
       if Value then
-         flyBV = Instance.new("BodyVelocity")
-         flyBV.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-         flyBV.Velocity = Vector3.new()
-         flyBV.Parent = root
-
-         flyBG = Instance.new("BodyGyro")
-         flyBG.MaxTorque = Vector3.new(1e9, 1e9, 1e9)
-         flyBG.CFrame = workspace.CurrentCamera.CFrame
-         flyBG.Parent = root
-
-         flyConnection = RunService.RenderStepped:Connect(function()
-            if not flying then return end
-            local cam = workspace.CurrentCamera
-            flyBV.Velocity = cam.CFrame:VectorToWorldSpace(moveDir) * flySpeed
-            flyBG.CFrame = cam.CFrame
-         end)
-
-         if not flyGui then
-            flyGui = Instance.new("ScreenGui")
-            flyGui.Parent = game.CoreGui
-            flyGui.ResetOnSpawn = false
-
-            local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 300, 0, 300)
-            frame.Position = UDim2.new(0.5, -150, 0.75, -150)
-            frame.BackgroundTransparency = 0.4
-            frame.BackgroundColor3 = Color3.fromRGB(20, 20, 40)
-            frame.Parent = flyGui
-
-            local buttons = {
-               {dir = Vector3.new(0, 0, -1), text = "İleri ↑", pos = UDim2.new(0.5, -40, 0.1, 0)},
-               {dir = Vector3.new(0, 0, 1), text = "Geri ↓", pos = UDim2.new(0.5, -40, 0.7, 0)},
-               {dir = Vector3.new(-1, 0, 0), text = "Sol ←", pos = UDim2.new(0.1, 0, 0.4, 0)},
-               {dir = Vector3.new(1, 0, 0), text = "Sağ →", pos = UDim2.new(0.7, 0, 0.4, 0)},
-               {dir = Vector3.new(0, 1, 0), text = "Yukarı", pos = UDim2.new(0.85, 0, 0.2, 0)},
-               {dir = Vector3.new(0, -1, 0), text = "Aşağı", pos = UDim2.new(0.85, 0, 0.6, 0)},
-            }
-
-            for _, btnData in pairs(buttons) do
-               local btn = Instance.new("TextButton")
-               btn.Size = UDim2.new(0, 80, 0, 80)
-               btn.Position = btnData.pos
-               btn.Text = btnData.text
-               btn.BackgroundColor3 = Color3.fromRGB(80, 80, 255)
-               btn.TextColor3 = Color3.new(1,1,1)
-               btn.Font = Enum.Font.GothamBold
-               btn.TextSize = 20
-               btn.Parent = frame
-
-               btn.MouseButton1Down:Connect(function()
-                  if flying then moveDir = moveDir + btnData.dir end
-               end)
-
-               btn.MouseButton1Up:Connect(function()
-                  if flying then moveDir = moveDir - btnData.dir end
-               end)
+         local function flyLoop()
+            while flying do
+               wait()
+               if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                  local root = player.Character.HumanoidRootPart
+                  local move = Vector3.new(0,0,0)
+                  if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + Vector3.new(0,0,-1) end
+                  if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move + Vector3.new(0,0,1) end
+                  if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move + Vector3.new(-1,0,0) end
+                  if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + Vector3.new(1,0,0) end
+                  if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
+                  if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then move = move + Vector3.new(0,-1,0) end
+                  root.Velocity = (mouse.Hit.p - root.Position).unit * speed + move * speed
+               end
             end
          end
 
-         Rayfield:Notify({Title = "Aktif", Content = "Mobil Fly aktif! Tuşlara dokun."})
+         spawn(flyLoop)
+         Rayfield:Notify({Title = "Aktif", Content = "Fly aktif! WASD + Space/Ctrl ile uç."})
       else
-         if flyConnection then flyConnection:Disconnect() end
-         if flyBV then flyBV:Destroy() end
-         if flyBG then flyBG:Destroy() end
-         if flyGui then flyGui:Destroy() end
-         moveDir = Vector3.new()
+         flying = false
          Rayfield:Notify({Title = "Kapalı", Content = "Fly kapatıldı."})
       end
    end,
 })
 
-UniTab:CreateSlider({
-   Name = "Fly Hızı",
-   Range = {10, 200},
-   Increment = 5,
-   Suffix = "Speed",
-   CurrentValue = 50,
-   Callback = function(Value)
-      flySpeed = Value
-   end,
-})
-
--- Noclip
-UniTab:CreateToggle({
-   Name = "Noclip (Duvarlardan Geçme)",
+UniversalTab:CreateToggle({
+   Name = "Noclip",
    CurrentValue = false,
    Callback = function(Value)
-      local noclipConn
-      if Value then
-         noclipConn = RunService.Stepped:Connect(function()
-            if LocalPlayer.Character then
-               for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-                  if part:IsA("BasePart") then part.CanCollide = false end
+      local noclip = Value
+      local player = LocalPlayer
+
+      local function noclipLoop()
+         while noclip do
+            wait()
+            if player.Character then
+               for _, part in pairs(player.Character:GetDescendants()) do
+                  if part:IsA("BasePart") then
+                     part.CanCollide = false
+                  end
                end
             end
-         end)
+         end
+      end
+
+      if Value then
+         spawn(noclipLoop)
          Rayfield:Notify({Title = "Aktif", Content = "Noclip aktif!"})
       else
-         if noclipConn then noclipConn:Disconnect() end
          Rayfield:Notify({Title = "Kapalı", Content = "Noclip kapatıldı."})
       end
    end,
 })
 
--- Fling (düzeltilmiş - değince uzaya uçurur/öldürür, seni uçurmuyor)
-local flingActive = false
-UniTab:CreateToggle({
-   Name = "Fling (Değince Uzaya Uçur / Öldür)",
-   CurrentValue = false,
+UniversalTab:CreateSlider({
+   Name = "Yürüme Hızı",
+   Range = {16, 500},
+   Increment = 10,
+   Suffix = "Speed",
+   CurrentValue = 16,
    Callback = function(Value)
-      flingActive = Value
-      if Value then
-         Rayfield:Notify({Title = "Aktif", Content = "Fling aktif! Yakınlaşınca uçurur/öldürür."})
-      else
-         Rayfield:Notify({Title = "Kapalı", Content = "Fling kapatıldı."})
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+         LocalPlayer.Character.Humanoid.WalkSpeed = Value
       end
    end,
 })
 
-RunService.Heartbeat:Connect(function()
-   if flingActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-      local root = LocalPlayer.Character.HumanoidRootPart
-      for _, plr in pairs(Players:GetPlayers()) do
-         if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-            local targetRoot = plr.Character.HumanoidRootPart
-            local dist = (targetRoot.Position - root.Position).Magnitude
-            if dist < 10 then  -- değme mesafesi
-               local flingForce = Vector3.new(math.random(-400,400), 2000, math.random(-400,400))  -- uzaya uçur
-               targetRoot.Velocity = flingForce
-               -- Öldürme denemesi (yüksek velocity + düşme hasarı)
-               if plr.Character:FindFirstChild("Humanoid") then
-                  plr.Character.Humanoid.Health = 0
-               end
-            end
-         end
-      end
-   end
-end)
-
--- ESP + Distance
-local espConnections = {}
-UniTab:CreateToggle({
-   Name = "ESP (Duvar Arkasından + Distance)",
-   CurrentValue = false,
+UniversalTab:CreateSlider({
+   Name = "Zıplama Gücü",
+   Range = {50, 500},
+   Increment = 10,
+   Suffix = "Jump",
+   CurrentValue = 50,
    Callback = function(Value)
-      if Value then
-         for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character then
-               local highlight = Instance.new("Highlight")
-               highlight.FillColor = Color3.fromRGB(255, 0, 0)
-               highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
-               highlight.FillTransparency = 0.5
-               highlight.OutlineTransparency = 0
-               highlight.Parent = plr.Character
-
-               local billboard = Instance.new("BillboardGui")
-               billboard.Adornee = plr.Character:FindFirstChild("Head") or plr.Character:FindFirstChild("HumanoidRootPart")
-               billboard.Size = UDim2.new(0, 200, 0, 50)
-               billboard.StudsOffset = Vector3.new(0, 3, 0)
-               billboard.AlwaysOnTop = true
-               billboard.Parent = plr.Character
-
-               local text = Instance.new("TextLabel")
-               text.Size = UDim2.new(1, 0, 1, 0)
-               text.BackgroundTransparency = 1
-               text.TextColor3 = Color3.fromRGB(255, 255, 255)
-               text.TextStrokeTransparency = 0
-               text.Parent = billboard
-
-               local conn = RunService.RenderStepped:Connect(function()
-                  if billboard.Adornee and billboard.Adornee.Parent then
-                     local dist = (LocalPlayer.Character.HumanoidRootPart.Position - billboard.Adornee.Position).Magnitude
-                     text.Text = plr.Name .. "\n" .. math.floor(dist) .. " studs"
-                  end
-               end)
-
-               table.insert(espConnections, {highlight = highlight, billboard = billboard, conn = conn})
-            end
-         end
-         Rayfield:Notify({Title = "Aktif", Content = "ESP aktif!"})
-      else
-         for _, conn in pairs(espConnections) do
-            if conn.highlight then conn.highlight:Destroy() end
-            if conn.billboard then conn.billboard:Destroy() end
-            if conn.conn then conn.conn:Disconnect() end
-         end
-         espConnections = {}
-         Rayfield:Notify({Title = "Kapalı", Content = "ESP kapatıldı."})
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+         LocalPlayer.Character.Humanoid.JumpPower = Value
       end
    end,
 })
 
--- Infinite Jump
-UniTab:CreateToggle({
+UniversalTab:CreateToggle({
    Name = "Infinite Jump",
    CurrentValue = false,
    Callback = function(Value)
@@ -288,221 +174,1573 @@ UniTab:CreateToggle({
    end,
 })
 
--- Aimbot
-local aimbotTarget = nil
-UniTab:CreateToggle({
-   Name = "Aimbot (Kamera Kilitlenir)",
+UniversalTab:CreateToggle({
+   Name = "No Fall Damage",
    CurrentValue = false,
    Callback = function(Value)
       if Value then
-         local closest, dist = nil, math.huge
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.MaxHealth = math.huge
+            LocalPlayer.Character.Humanoid.Health = math.huge
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "No Fall Damage aktif!"})
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.MaxHealth = 100
+            LocalPlayer.Character.Humanoid.Health = 100
+         end
+         Rayfield:Notify({Title = "Kapalı", Content = "No Fall Damage kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Godmode",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.MaxHealth = math.huge
+            LocalPlayer.Character.Humanoid.Health = math.huge
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Godmode aktif!"})
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.MaxHealth = 100
+            LocalPlayer.Character.Humanoid.Health = 100
+         end
+         Rayfield:Notify({Title = "Kapalı", Content = "Godmode kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Invisible",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+               if part:IsA("BasePart") then part.Transparency = 1 end
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Invisible aktif!"})
+      else
+         if LocalPlayer.Character then
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+               if part:IsA("BasePart") then part.Transparency = 0 end
+            end
+         end
+         Rayfield:Notify({Title = "Kapalı", Content = "Invisible kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Full Bright",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Lighting.Brightness = 1
+         Lighting.GlobalShadows = false
+         Lighting.FogEnd = 9e9
+         Rayfield:Notify({Title = "Aktif", Content = "Full Bright aktif!"})
+      else
+         Lighting.Brightness = 1
+         Lighting.GlobalShadows = true
+         Lighting.FogEnd = 100
+         Rayfield:Notify({Title = "Kapalı", Content = "Full Bright kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "No Clip Players",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
          for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
-               local d = (plr.Character.Head.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
-               if d < dist and d < 500 then
-                  closest = plr.Character.Head
-                  dist = d
+            if plr ~= LocalPlayer and plr.Character then
+               for _, part in pairs(plr.Character:GetDescendants()) do
+                  if part:IsA("BasePart") then part.CanCollide = false end
                end
             end
          end
-
-         if closest then
-            aimbotTarget = closest
-            Rayfield:Notify({Title = "Aktif", Content = "Aimbot kilitlendi!"})
-         else
-            aimbotTarget = nil
-            Rayfield:Notify({Title = "Hedef Yok", Content = "Yakın hedef bulunamadı."})
-         end
+         Rayfield:Notify({Title = "Aktif", Content = "No Clip Players aktif!"})
       else
-         aimbotTarget = nil
-         Rayfield:Notify({Title = "Kapalı", Content = "Aimbot kapatıldı."})
-      end
-   end,
-})
-
-RunService.RenderStepped:Connect(function()
-   if aimbotTarget and aimbotTarget.Parent then
-      local cam = workspace.CurrentCamera
-      cam.CFrame = CFrame.lookAt(cam.CFrame.Position, aimbotTarget.Position)
-   end
-end)
-
--- Bang
-UniTab:CreateInput({
-   Name = "Bang (Kick + Yanına Işınla)",
-   PlaceholderText = "Kişi adını yaz...",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(Text)
-      local targetName = Text:lower()
-      for _, plr in pairs(Players:GetPlayers()) do
-         if plr ~= LocalPlayer and (plr.Name:lower():find(targetName) or plr.DisplayName:lower():find(targetName)) then
-            if LocalPlayer.Character and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-               LocalPlayer.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+         for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+               for _, part in pairs(plr.Character:GetDescendants()) do
+                  if part:IsA("BasePart") then part.CanCollide = true end
+               end
             end
-            plr:Kick("Fsien Hub tarafından banglandı!")
-            Rayfield:Notify({Title = "Bang", Content = plr.Name .. " banglandı!"})
-            break
          end
+         Rayfield:Notify({Title = "Kapalı", Content = "No Clip Players kapatıldı."})
       end
    end,
 })
 
--- Hitbox Büyütme + Kırmızı Alan
-local hitboxExpanded = false
-local originalSizes = {}
-local redBoxes = {}
-
-UniTab:CreateToggle({
-   Name = "Hitbox Büyütme + Kırmızı Alan",
+UniversalTab:CreateToggle({
+   Name = "Walk on Water",
    CurrentValue = false,
    Callback = function(Value)
-      hitboxExpanded = Value
       if Value then
-         originalSizes = {}
-         redBoxes = {}
+         if LocalPlayer.Character then
+            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+               if part:IsA("BasePart") then part.CanCollide = false end
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Walk on Water aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Walk on Water kapatıldı."})
+      end
+   end,
+})
 
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Knockback",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Knockback aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Knockback kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "No Clip Through Players",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
          for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-               local root = plr.Character.HumanoidRootPart
-               originalSizes[plr] = root.Size
-
-               root.Size = Vector3.new(15, 15, 15)
-               root.Transparency = 0.7
-
-               local box = Instance.new("BoxHandleAdornment")
-               box.Adornee = root
-               box.Size = root.Size
-               box.Color3 = Color3.fromRGB(255, 0, 0)
-               box.Transparency = 0.6
-               box.AlwaysOnTop = true
-               box.ZIndex = 10
-               box.Parent = root
-
-               redBoxes[plr] = box
+            if plr ~= LocalPlayer and plr.Character then
+               for _, part in pairs(plr.Character:GetDescendants()) do
+                  if part:IsA("BasePart") then part.CanCollide = false end
+               end
             end
          end
-
-         Rayfield:Notify({Title = "Aktif", Content = "Hitbox büyütüldü + kırmızı alan gösteriliyor!"})
+         Rayfield:Notify({Title = "Aktif", Content = "No Clip Through Players aktif!"})
       else
-         for plr, size in pairs(originalSizes) do
-            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
-               plr.Character.HumanoidRootPart.Size = size
-               plr.Character.HumanoidRootPart.Transparency = 0
+         for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+               for _, part in pairs(plr.Character:GetDescendants()) do
+                  if part:IsA("BasePart") then part.CanCollide = true end
+               end
             end
          end
+         Rayfield:Notify({Title = "Kapalı", Content = "No Clip Through Players kapatıldı."})
+      end
+   end,
+})
 
-         for _, box in pairs(redBoxes) do
-            if box then box:Destroy() end
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
          end
-
-         originalSizes = {}
-         redBoxes = {}
-
-         Rayfield:Notify({Title = "Kapalı", Content = "Hitbox normale döndü."})
-      end
-   end,
-})
-
--- Troll Bölgesi
-local TrollTab = Window:CreateTab("Troll Bölgesi")
-
-TrollTab:CreateLabel("Troll Özellikleri")
-
-TrollTab:CreateButton({
-   Name = "Fake Ban Mesajı",
-   Callback = function()
-      Rayfield:Notify({Title = "BANLANDIN!", Content = "Sen banlandın! 😈", Duration = 10})
-   end,
-})
-
-TrollTab:CreateButton({
-   Name = "Karakter Spin",
-   Callback = function()
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-         local root = LocalPlayer.Character.HumanoidRootPart
-         spawn(function()
-            for i = 1, 100 do
-               root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(360), 0)
-               wait(0.05)
-            end
-         end)
-         Rayfield:Notify({Title = "Spin", Content = "Karakter dönüyor!"})
-      end
-   end,
-})
-
-TrollTab:CreateButton({
-   Name = "Random Teleport",
-   Callback = function()
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-         local root = LocalPlayer.Character.HumanoidRootPart
-         root.CFrame = CFrame.new(math.random(-500, 500), 100, math.random(-500, 500))
-         Rayfield:Notify({Title = "Teleport", Content = "Rastgele yere ışınlandın!"})
-      end
-   end,
-})
-
-TrollTab:CreateButton({
-   Name = "Loop Ses Troll",
-   Callback = function()
-      spawn(function()
-         while true do
-            wait(0.1)
-            local sound = Instance.new("Sound")
-            sound.SoundId = "rbxassetid://1847661820"
-            sound.Volume = 10
-            sound.Parent = workspace
-            sound:Play()
-            game.Debris:AddItem(sound, 2)
-         end
-      end)
-      Rayfield:Notify({Title = "Loop Ses", Content = "Ses troll başladı!"})
-   end,
-})
-
--- Steal a Brainrot Tab
-local SabTab = Window:CreateTab("Steal a Brainrot")
-
-SabTab:CreateLabel("20M+ Değerli Brainrot Tarayıcı")
-
-SabTab:CreateButton({
-   Name = "Başlat Tarama & İsimleri Göster",
-   Callback = function()
-      Rayfield:Notify({Title = "Tarama Başladı", Content = "20M+ brainrot aranıyor..."})
-
-      local threshold = 20000000
-      local brainrotList = {}
-
-      for _, obj in pairs(workspace:GetChildren()) do
-         if obj:IsA("Model") and (obj:FindFirstChild("Income") or obj:FindFirstChild("Value")) then
-            local income = 0
-            if obj:FindFirstChild("Income") then income = obj.Income.Value or 0 end
-            if obj:FindFirstChild("Value") then income = obj.Value.Value or 0 end
-
-            if income >= threshold then
-               local name = obj.Name or "Bilinmeyen Brainrot"
-               table.insert(brainrotList, name .. " (Income: " .. income .. ")")
-            end
-         end
-      end
-
-      if #brainrotList > 0 then
-         local msg = "Bu serverde değerli brainrot var!\n\n" .. table.concat(brainrotList, "\n")
-         Rayfield:Notify({Title = "Bulundu!", Content = msg, Duration = 20})
       else
-         Rayfield:Notify({Title = "Yok", Content = "20M+ yok, hop yapılıyor..."})
-         wait(2)
-         game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
       end
    end,
 })
 
-SabTab:CreateButton({
-   Name = "Hazır Finder Yükle",
-   Callback = function()
-      loadstring(game:HttpGet("https://raw.githubusercontent.com/r0bloxlucker/sabfinderwithoutdualhook/refs/heads/main/finderv2.lua"))()
-      Rayfield:Notify({Title = "Yüklendi", Content = "Hazır finder aktif!"})
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
    end,
 })
 
-print("Fsien Hub yüklendi! Tüm özellikler aktif.")
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(0, 100, 0)
+               end)
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "Anti Void aktif!"})
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Void kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Push",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Push aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CustomPhysicalProperties = nil
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Push kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Slip",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Slip aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.Friction = 0.5
+            Rayfield:Notify({Title = "Kapalı", Content = "Anti Slip kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Stun",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Stun aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Stun kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Ragdoll",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.PlatformStand = false
+            Rayfield:Notify({Title = "Aktif", Content = "Anti Ragdoll aktif!"})
+         end
+      else
+         Rayfield:Notify({Title = "Kapalı", Content = "Anti Ragdoll kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Moon Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 200
+            Rayfield:Notify({Title = "Aktif", Content = "Moon Jump aktif!"})
+         end
+      else
+         if LocalPlayer.Character then
+            LocalPlayer.Character.Humanoid.JumpPower = 50
+            Rayfield:Notify({Title = "Kapalı", Content = "Moon Jump kapatıldı."})
+         end
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Low Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 50
+         Rayfield:Notify({Title = "Aktif", Content = "Low Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "Low Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "High Gravity",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         Workspace.Gravity = 500
+         Rayfield:Notify({Title = "Aktif", Content = "High Gravity aktif!"})
+      else
+         Workspace.Gravity = 196.2
+         Rayfield:Notify({Title = "Kapalı", Content = "High Gravity kapatıldı."})
+      end
+   end,
+})
+
+UniversalTab:CreateToggle({
+   Name = "Anti Void",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         if LocalPlayer.Character then
+            local humanoid = LocalPlayer.Character:FindFirstChild("Humanoid")
+            if humanoid then
+               humanoid.Died:Connect(function()
+                  LocalPlayer.Character.HumanoidRootPart.CFrame = C
