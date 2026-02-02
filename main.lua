@@ -1,4 +1,4 @@
--- Fsien Hub - Delta Executor için (Tüm Özellikler Bir Arada - Final)
+-- Fsien Hub - Delta Executor için (Tüm Özellikler Bir Arada - Şık Versiyon)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -180,15 +180,15 @@ UniTab:CreateToggle({
    end,
 })
 
--- Fling (düzeltilmiş)
+-- Fling (düzeltilmiş - değince uzaya uçurur/öldürür, seni uçurmuyor)
 local flingActive = false
 UniTab:CreateToggle({
-   Name = "Fling (Yakın Oyuncuları Uzaya Fırlat)",
+   Name = "Fling (Değince Uzaya Uçur / Öldür)",
    CurrentValue = false,
    Callback = function(Value)
       flingActive = Value
       if Value then
-         Rayfield:Notify({Title = "Aktif", Content = "Uzaya Fling aktif! Yakın oyuncular uçuyor."})
+         Rayfield:Notify({Title = "Aktif", Content = "Fling aktif! Yakınlaşınca uçurur/öldürür."})
       else
          Rayfield:Notify({Title = "Kapalı", Content = "Fling kapatıldı."})
       end
@@ -202,9 +202,13 @@ RunService.Heartbeat:Connect(function()
          if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
             local targetRoot = plr.Character.HumanoidRootPart
             local dist = (targetRoot.Position - root.Position).Magnitude
-            if dist < 15 then
-               local flingForce = Vector3.new(math.random(-300,300), 1500, math.random(-300,300))
+            if dist < 10 then  -- değme mesafesi
+               local flingForce = Vector3.new(math.random(-400,400), 2000, math.random(-400,400))  -- uzaya uçur
                targetRoot.Velocity = flingForce
+               -- Öldürme denemesi (yüksek velocity + düşme hasarı)
+               if plr.Character:FindFirstChild("Humanoid") then
+                  plr.Character.Humanoid.Health = 0
+               end
             end
          end
       end
@@ -323,7 +327,7 @@ RunService.RenderStepped:Connect(function()
    end
 end)
 
--- Bang (Kick + Işınla)
+-- Bang
 UniTab:CreateInput({
    Name = "Bang (Kick + Yanına Işınla)",
    PlaceholderText = "Kişi adını yaz...",
