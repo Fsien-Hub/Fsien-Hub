@@ -1,22 +1,14 @@
--- FsienHub | Steal a Brainrot Ultimate 2026 (Keyless, DrRay UI)
--- Tüm çalışan script'lerden esinlenildi: auto steal, farm, fly, ESP + daha fazla
--- Undetected, mobile/PC uyumlu (Delta, Arceus X, Fluxus)
+-- FsienHub | Steal a Brainrot Ultimate 2026 (Keyless, Venice UI)
+-- Mobil uyumlu, siyah ekran fix'li, auto steal/farm/fly/ESP + daha fazla
+-- Pastebin/Bo3.gg esinlenmeli, undetected (Delta Mobile, Arceus X)
 
-local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/DrRay-UI-Library/main/DrRay.lua"))()
+local Venice = loadstring(game:HttpGet("https://raw.githubusercontent.com/Babyhamsta/Venice/main/Main.lua"))()
 
-local window = DrRayLibrary:Load("FsienHub - Steal a Brainrot 🧠💀", "Default")  -- UI penceresi
+local Window = Venice:NewWindow("FsienHub - Steal a Brainrot 🧠💀")
 
--- Tabs
-local mainTab = DrRayLibrary:AddTab("Ana")
-local stealTab = DrRayLibrary:AddTab("Steal & Farm")
-local visualTab = DrRayLibrary:AddTab("Görsel")
-local movementTab = DrRayLibrary:AddTab("Hareket")
-local trollTab = DrRayLibrary:AddTab("Troll & Koruma")
-
--- Globals
+-- Globals & Services
 getgenv().AutoSteal = false
 getgenv().AutoFarmCash = false
-getgenv().AutoLock = false
 getgenv().FlyEnabled = false
 getgenv().Noclip = false
 getgenv().InfJump = false
@@ -26,195 +18,132 @@ getgenv().SpeedValue = 50
 getgenv().Invisible = false
 getgenv().AntiKick = true
 
--- Services
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Player = Players.LocalPlayer
 
--- Helper: Fire ProximityPrompts
-local function FirePrompts(nameFilter, maxDist)
-    maxDist = maxDist or 50
+-- Helper: Fire Proximity
+local function FirePrompts(filter, dist)
+    dist = dist or 50
     for _, obj in pairs(Workspace:GetDescendants()) do
-        if obj:IsA("ProximityPrompt") and obj.Name:lower():find(nameFilter) then
-            local char = Player.Character
-            if char and char:FindFirstChild("HumanoidRootPart") then
-                local dist = (obj.Parent.Position - char.HumanoidRootPart.Position).Magnitude
-                if dist < maxDist then
-                    fireproximityprompt(obj)
-                end
+        if obj:IsA("ProximityPrompt") and obj.Name:lower():find(filter) then
+            local root = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+            if root and (obj.Parent.Position - root.Position).Magnitude < dist then
+                fireproximityprompt(obj)
             end
         end
     end
 end
 
--- Auto Loops
+-- Loops
 spawn(function()
     while true do
-        if getgenv().AutoSteal then
-            FirePrompts("steal")
-            FirePrompts("collect")
-            FirePrompts("brainrot")
-        end
-        if getgenv().AutoFarmCash then
-            FirePrompts("cash")
-            FirePrompts("money")
-            FirePrompts("collect")
-        end
-        task.wait(0.2)  -- Anti-kick delay
+        if AutoSteal then FirePrompts("steal") FirePrompts("collect") FirePrompts("brainrot") end
+        if AutoFarmCash then FirePrompts("cash") FirePrompts("money") FirePrompts("collect") end
+        task.wait(0.2)
     end
 end)
 
--- Fly
-local FlyConnection
-local function ToggleFly(enabled)
-    local char = Player.Character
-    if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-    local root = char.HumanoidRootPart
-    
-    if enabled then
-        local bv = Instance.new("BodyVelocity")
-        bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
-        bv.Velocity = Vector3.new(0, 0, 0)
-        bv.Parent = root
-        
-        FlyConnection = RunService.Heartbeat:Connect(function()
-            local cam = Workspace.CurrentCamera
-            local vel = Vector3.new(0,0,0)
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + (cam.CFrame.LookVector * 50) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - (cam.CFrame.LookVector * 50) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - (cam.CFrame.RightVector * 50) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + (cam.CFrame.RightVector * 50) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then vel = vel + Vector3.new(0,50,0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then vel = vel - Vector3.new(0,50,0) end
-            bv.Velocity = vel
-        end)
-    else
-        if FlyConnection then FlyConnection:Disconnect() end
-        if root:FindFirstChild("BodyVelocity") then root:FindFirstChild("BodyVelocity"):Destroy() end
-    end
-end
-
--- Noclip
 spawn(function()
     while true do
-        if getgenv().Noclip and Player.Character then
+        if Noclip and Player.Character then
             for _, part in pairs(Player.Character:GetDescendants()) do
-                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                    part.CanCollide = false
-                end
+                if part:IsA("BasePart") then part.CanCollide = false end
             end
         end
         task.wait()
     end
 end)
 
+-- Fly
+local FlyConn
+local function ToggleFly(on)
+    local root = Player.Character and Player.Character:FindFirstChild("HumanoidRootPart")
+    if not root then return end
+    if on then
+        local bv = Instance.new("BodyVelocity", root)
+        bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
+        bv.Velocity = Vector3.new(0,0,0)
+        FlyConn = RunService.Heartbeat:Connect(function()
+            local vel = Vector3.new(0,0,0)
+            local cam = Workspace.CurrentCamera
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + cam.CFrame.LookVector * 50 end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - cam.CFrame.LookVector * 50 end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - cam.CFrame.RightVector * 50 end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + cam.CFrame.RightVector * 50 end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then vel = vel + Vector3.new(0,50,0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then vel = vel - Vector3.new(0,50,0) end
+            bv.Velocity = vel
+        end)
+    else
+        if FlyConn then FlyConn:Disconnect() end
+        if root:FindFirstChild("BodyVelocity") then root:FindFirstChild("BodyVelocity"):Destroy() end
+    end
+end
+
 -- Inf Jump
 UserInputService.JumpRequest:Connect(function()
-    if getgenv().InfJump and Player.Character then
-        Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
+    if InfJump and Player.Character then Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end
 end)
 
--- ESP (Highlight)
-local ESPHighlights = {}
-local function ToggleESP(enabled)
+-- ESP
+local ESPs = {}
+local function ToggleESP(on)
     for _, plr in pairs(Players:GetPlayers()) do
         if plr ~= Player and plr.Character then
-            local highlight = ESPHighlights[plr]
-            if enabled then
-                if not highlight then
-                    highlight = Instance.new("Highlight")
-                    highlight.FillColor = Color3.fromRGB(255, 0, 170)
-                    highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
-                    highlight.Parent = plr.Character
-                    ESPHighlights[plr] = highlight
-                end
+            if on then
+                local hl = Instance.new("Highlight", plr.Character)
+                hl.FillColor = Color3.fromRGB(255,0,170)
+                ESPs[plr] = hl
             else
-                if highlight then highlight:Destroy() end
-                ESPHighlights[plr] = nil
+                if ESPs[plr] then ESPs[plr]:Destroy() end
             end
         end
     end
 end
-Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function(char)
-        if getgenv().ESPEnabled then ToggleESP(true) end
-    end)
-end)
-Players.PlayerRemoving:Connect(function(plr)
-    if ESPHighlights[plr] then ESPHighlights[plr]:Destroy() end
-end)
+Players.PlayerAdded:Connect(function(plr) plr.CharacterAdded:Connect(function() if ESPEnabled then ToggleESP(true) end end) end)
 
--- God Mode
+-- God & AntiKick
 spawn(function()
     while true do
-        if getgenv().GodMode and Player.Character then
-            Player.Character.Humanoid.Health = Player.Character.Humanoid.MaxHealth
-        end
-        task.wait(0.1)
+        if GodMode and Player.Character then Player.Character.Humanoid.Health = 100 end
+        if AntiKick and Player.Character then Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0,0,0.01) end
+        task.wait(AntiKick and 10 or 0.1)
     end
 end)
 
--- Anti Kick
-spawn(function()
-    while getgenv().AntiKick do
-        if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 0.01)
-        end
-        task.wait(10)
-    end
-end)
+-- UI Tabs
+local StealTab = Window:NewTab("Steal & Farm")
+local StealSec = StealTab:NewSection("Otomatik Özellikler")
+StealSec:NewToggle("Auto Steal", function(v) AutoSteal = v end)
+StealSec:NewToggle("Auto Farm Cash", function(v) AutoFarmCash = v end)
+StealSec:NewButton("Instant Steal", function() FirePrompts("steal", 100) end)
 
--- UI Sections
-local mainSection = mainTab:AddSection("FsienHub 2026 - Brainrot Edition")
-mainSection:AddLabel("Auto Steal & Farm Aktif 🧠🔥")
-mainSection:AddButton("Rejoin Server", function()
-    game:GetService("TeleportService"):Teleport(game.PlaceId)
-end)
+local MoveTab = Window:NewTab("Hareket")
+local MoveSec = MoveTab:NewSection("Hız & Uçma")
+MoveSec:NewToggle("Fly", function(v) FlyEnabled = v ToggleFly(v) end)
+MoveSec:NewToggle("Noclip", function(v) Noclip = v end)
+MoveSec:NewToggle("Inf Jump", function(v) InfJump = v end)
+MoveSec:NewSlider("Speed", 16, 300, function(v) SpeedValue = v if Player.Character then Player.Character.Humanoid.WalkSpeed = v end end)
 
-local stealSection = stealTab:AddSection("Steal & Farm")
-stealSection:AddToggle("Auto Steal", false, function(state) getgenv().AutoSteal = state end)
-stealSection:AddToggle("Auto Farm Cash", false, function(state) getgenv().AutoFarmCash = state end)
-stealSection:AddToggle("Auto Lock Base", false, function(state)
-    getgenv().AutoLock = state
-    if state then FirePrompts("lock") end
-end)
-stealSection:AddButton("Instant Steal All", function() FirePrompts("steal", 100) end)
+local VisualTab = Window:NewTab("Görsel")
+local VisualSec = VisualTab:NewSection("ESP")
+VisualSec:NewToggle("Player ESP", function(v) ESPEnabled = v ToggleESP(v) end)
 
-local visualSection = visualTab:AddSection("ESP")
-visualSection:AddToggle("Player & Brainrot ESP", false, function(state)
-    getgenv().ESPEnabled = state
-    ToggleESP(state)
-end)
-
-local movementSection = movementTab:AddSection("Hareket")
-movementSection:AddToggle("Fly", false, function(state)
-    getgenv().FlyEnabled = state
-    ToggleFly(state)
-end)
-movementSection:AddToggle("Noclip", false, function(state) getgenv().Noclip = state end)
-movementSection:AddToggle("Infinite Jump", false, function(state) getgenv().InfJump = state end)
-movementSection:AddSlider("Speed", 16, 500, 50, function(value)
-    getgenv().SpeedValue = value
-    if Player.Character then Player.Character.Humanoid.WalkSpeed = value end
-end)
-movementSection:AddToggle("Invisible", false, function(state)
-    getgenv().Invisible = state
+local TrollTab = Window:NewTab("Troll")
+local TrollSec = TrollTab:NewSection("Koruma")
+TrollSec:NewToggle("God Mode", function(v) GodMode = v end)
+TrollSec:NewToggle("Anti Kick", function(v) AntiKick = v end)
+TrollSec:NewToggle("Invisible", function(v)
+    Invisible = v
     if Player.Character then
-        for _, part in pairs(Player.Character:GetChildren()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
-                part.Transparency = state and 1 or 0
-            end
+        for _, p in pairs(Player.Character:GetChildren()) do
+            if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then p.Transparency = v and 1 or 0 end
         end
     end
 end)
-
-local trollSection = trollTab:AddSection("Troll & Koruma")
-trollSection:AddToggle("God Mode", false, function(state) getgenv().GodMode = state end)
-trollSection:AddToggle("Anti Kick", true, function(state) getgenv().AntiKick = state end)
 
 -- Notify
-DrRayLibrary:Notify("FsienHub Yüklendi", "Script aktif, UI açıldı! 🧠💀", 5)
+Venice:Notify("FsienHub Yüklendi", "UI aktif, steal başla kral! 🧠🔥")
