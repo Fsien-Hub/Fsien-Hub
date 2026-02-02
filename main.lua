@@ -1,4 +1,4 @@
--- Fsien Hub - Delta Executor için (Düzeltilmiş + Mobil Fly Panel + Fake Chat + Bypass)
+-- Fsien Hub - Delta Executor için (Tüm Özellikler Bir Arada)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -14,19 +14,55 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- Sağ alt köşede kalıcı Discord mesajı
+local function showDiscordMessage()
+   local gui = Instance.new("ScreenGui")
+   gui.Parent = game.CoreGui
+   gui.ResetOnSpawn = false
+
+   local frame = Instance.new("Frame")
+   frame.Size = UDim2.new(0, 300, 0, 80)
+   frame.Position = UDim2.new(1, -310, 1, -90)
+   frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+   frame.BackgroundTransparency = 0.4
+   frame.BorderSizePixel = 0
+   frame.Parent = gui
+
+   local corner = Instance.new("UICorner")
+   corner.CornerRadius = UDim.new(0, 12)
+   corner.Parent = frame
+
+   local text = Instance.new("TextLabel")
+   text.Size = UDim2.new(1, 0, 1, 0)
+   text.BackgroundTransparency = 1
+   text.Text = "Discord sunucumuza gelmeyi unutmayın!\nbasarısı"
+   text.TextColor3 = Color3.fromRGB(255, 255, 255)
+   text.TextStrokeTransparency = 0.7
+   text.TextStrokeColor3 = Color3.fromRGB(0, 170, 255)
+   text.Font = Enum.Font.GothamBold
+   text.TextSize = 18
+   text.TextWrapped = true
+   text.Parent = frame
+
+   frame.BackgroundTransparency = 1
+   TweenService:Create(frame, TweenInfo.new(1.5, Enum.EasingStyle.Sine), {BackgroundTransparency = 0.4}):Play()
+end
+
+showDiscordMessage()
 
 -- Universal Hileler Tab
 local UniTab = Window:CreateTab("Universal Hileler")
 
--- Fly (PC + Mobil Panel)
+-- Mobil Tap Fly
 local flySpeed = 50
 local flying = false
 local flyBV, flyBG, flyConnection
 local flyGui = nil
+local moveDir = Vector3.new(0, 0, 0)
 
 UniTab:CreateToggle({
-   Name = "Uçma (Fly) - Fare/Kamera + Mobil Panel",
+   Name = "Mobil Tap Fly (Dokunmatik Panel)",
    CurrentValue = false,
    Callback = function(Value)
       flying = Value
@@ -34,7 +70,6 @@ UniTab:CreateToggle({
       if not root then return end
 
       if Value then
-         -- PC için BodyVelocity + BodyGyro
          flyBV = Instance.new("BodyVelocity")
          flyBV.MaxForce = Vector3.new(1e9, 1e9, 1e9)
          flyBV.Velocity = Vector3.new()
@@ -48,78 +83,64 @@ UniTab:CreateToggle({
          flyConnection = RunService.RenderStepped:Connect(function()
             if not flying then return end
             local cam = workspace.CurrentCamera
-            local moveDir = Vector3.new()
-
-            if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
-            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0,1,0) end
-            if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0,1,0) end
-
-            flyBV.Velocity = moveDir.Unit * flySpeed
+            flyBV.Velocity = cam.CFrame:VectorToWorldSpace(moveDir) * flySpeed
             flyBG.CFrame = cam.CFrame
          end)
 
-         -- Mobil için yön paneli
          if not flyGui then
             flyGui = Instance.new("ScreenGui")
             flyGui.Parent = game.CoreGui
             flyGui.ResetOnSpawn = false
 
             local frame = Instance.new("Frame")
-            frame.Size = UDim2.new(0, 200, 0, 200)
-            frame.Position = UDim2.new(0.5, -100, 0.8, -100)
-            frame.BackgroundTransparency = 0.6
-            frame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+            frame.Size = UDim2.new(0, 250, 0, 250)
+            frame.Position = UDim2.new(0.5, -125, 0.8, -125)
+            frame.BackgroundTransparency = 0.5
+            frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
             frame.Parent = flyGui
 
-            local directions = {
-               {dir = Vector3.new(0,0,-1), text = "↑", pos = UDim2.new(0.5, 0, 0, 0)},
-               {dir = Vector3.new(0,0,1), text = "↓", pos = UDim2.new(0.5, 0, 1, -50)},
-               {dir = Vector3.new(-1,0,0), text = "←", pos = UDim2.new(0, 0, 0.5, 0)},
-               {dir = Vector3.new(1,0,0), text = "→", pos = UDim2.new(1, -50, 0.5, 0)},
-               {dir = Vector3.new(0,1,0), text = "Space", pos = UDim2.new(0.5, 0, 0.5, -25)},
-               {dir = Vector3.new(0,-1,0), text = "Ctrl", pos = UDim2.new(0.5, 0, 0.5, 25)},
+            local buttons = {
+               {dir = Vector3.new(0, 0, -1), text = "↑", pos = UDim2.new(0.5, -30, 0, 0)},
+               {dir = Vector3.new(0, 0, 1), text = "↓", pos = UDim2.new(0.5, -30, 0.7, 0)},
+               {dir = Vector3.new(-1, 0, 0), text = "←", pos = UDim2.new(0, 0, 0.35, 0)},
+               {dir = Vector3.new(1, 0, 0), text = "→", pos = UDim2.new(0.7, 0, 0.35, 0)},
+               {dir = Vector3.new(0, 1, 0), text = "Yukarı", pos = UDim2.new(0.85, 0, 0.1, 0)},
+               {dir = Vector3.new(0, -1, 0), text = "Aşağı", pos = UDim2.new(0.85, 0, 0.6, 0)},
             }
 
-            for _, d in pairs(directions) do
+            for _, btnData in pairs(buttons) do
                local btn = Instance.new("TextButton")
                btn.Size = UDim2.new(0, 60, 0, 60)
-               btn.Position = d.pos
-               btn.Text = d.text
+               btn.Position = btnData.pos
+               btn.Text = btnData.text
                btn.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
                btn.TextColor3 = Color3.new(1,1,1)
                btn.Parent = frame
 
                btn.MouseButton1Down:Connect(function()
-                  if flying then
-                     local moveDir = d.dir
-                     flyBV.Velocity = moveDir.Unit * flySpeed
-                  end
+                  if flying then moveDir = moveDir + btnData.dir end
                end)
 
                btn.MouseButton1Up:Connect(function()
-                  if flying then
-                     flyBV.Velocity = Vector3.new()
-                  end
+                  if flying then moveDir = moveDir - btnData.dir end
                end)
             end
          end
 
-         Rayfield:Notify({Title = "Aktif", Content = "Uçma aktif! Mobil panel çıktı, PC için WASD/Space/Ctrl."})
+         Rayfield:Notify({Title = "Aktif", Content = "Mobil Tap Fly aktif! Tuşlara dokun."})
       else
          if flyConnection then flyConnection:Disconnect() flyConnection = nil end
          if flyBV then flyBV:Destroy() flyBV = nil end
          if flyBG then flyBG:Destroy() flyBG = nil end
          if flyGui then flyGui:Destroy() flyGui = nil end
-         Rayfield:Notify({Title = "Kapalı", Content = "Uçma kapatıldı."})
+         moveDir = Vector3.new()
+         Rayfield:Notify({Title = "Kapalı", Content = "Fly kapatıldı."})
       end
    end,
 })
 
 UniTab:CreateSlider({
-   Name = "Uçma Hızı",
+   Name = "Fly Hızı",
    Range = {10, 200},
    Increment = 5,
    Suffix = "Speed",
@@ -129,16 +150,37 @@ UniTab:CreateSlider({
    end,
 })
 
--- Diğer özellikler (önceki kodlardan aynı kalıyor, sadece Fling uzaya uçurma için değiştirildi)
+-- Noclip
+UniTab:CreateToggle({
+   Name = "Noclip",
+   CurrentValue = false,
+   Callback = function(Value)
+      local noclipConn
+      if Value then
+         noclipConn = RunService.Stepped:Connect(function()
+            if LocalPlayer.Character then
+               for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
+                  if part:IsA("BasePart") then part.CanCollide = false end
+               end
+            end
+         end)
+         Rayfield:Notify({Title = "Aktif", Content = "Noclip aktif!"})
+      else
+         if noclipConn then noclipConn:Disconnect() end
+         Rayfield:Notify({Title = "Kapalı", Content = "Noclip kapatıldı."})
+      end
+   end,
+})
+
 -- Fling (uzaya uçurma)
 local flingActive = false
 UniTab:CreateToggle({
-   Name = "Fling (Aktifken Yakın Oyuncuları Uzaya Fırlat)",
+   Name = "Fling (Yakın Oyuncuları Uzaya Fırlat)",
    CurrentValue = false,
    Callback = function(Value)
       flingActive = Value
       if Value then
-         Rayfield:Notify({Title = "Aktif", Content = "Uzaya Fling aktif! Yakın oyuncular uzaya uçuyor."})
+         Rayfield:Notify({Title = "Aktif", Content = "Uzaya Fling aktif!"})
       else
          Rayfield:Notify({Title = "Kapalı", Content = "Fling kapatıldı."})
       end
@@ -153,8 +195,7 @@ RunService.Heartbeat:Connect(function()
             local targetRoot = plr.Character.HumanoidRootPart
             local dist = (targetRoot.Position - root.Position).Magnitude
             if dist < 15 then
-               -- Uzaya fırlatma: çok yüksek yukarı + rastgele
-               local flingForce = Vector3.new(math.random(-200,200), 1000, math.random(-200,200))
+               local flingForce = Vector3.new(math.random(-200,200), 1200, math.random(-200,200))
                targetRoot.Velocity = flingForce
             end
          end
@@ -162,25 +203,238 @@ RunService.Heartbeat:Connect(function()
    end
 end)
 
--- Fake Chat Mesajı (başka isimle yazma, bypass korumalı)
-UniTab:CreateInput({
-   Name = "Fake Chat (Başka İsimle Yaz)",
-   PlaceholderText = "Mesaj yaz...",
-   RemoveTextAfterFocusLost = false,
-   Callback = function(message)
-      if message == "" then return end
-      local fakeName = "Admin" .. math.random(1000,9999)  -- rastgele isim
-      local chatRemote = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents") and ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest
-      if chatRemote then
-         chatRemote:FireServer(message, "All")
-         Rayfield:Notify({Title = "Gönderildi", Content = "Fake isimle (" .. fakeName .. ") mesaj gönderildi."})
+-- ESP + Distance
+local espConnections = {}
+UniTab:CreateToggle({
+   Name = "ESP (Duvar Arkasından + Distance)",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+               local highlight = Instance.new("Highlight")
+               highlight.FillColor = Color3.fromRGB(255, 0, 0)
+               highlight.OutlineColor = Color3.fromRGB(255, 255, 0)
+               highlight.FillTransparency = 0.5
+               highlight.OutlineTransparency = 0
+               highlight.Parent = plr.Character
+
+               local billboard = Instance.new("BillboardGui")
+               billboard.Adornee = plr.Character:FindFirstChild("Head") or plr.Character:FindFirstChild("HumanoidRootPart")
+               billboard.Size = UDim2.new(0, 200, 0, 50)
+               billboard.StudsOffset = Vector3.new(0, 3, 0)
+               billboard.AlwaysOnTop = true
+               billboard.Parent = plr.Character
+
+               local text = Instance.new("TextLabel")
+               text.Size = UDim2.new(1, 0, 1, 0)
+               text.BackgroundTransparency = 1
+               text.TextColor3 = Color3.fromRGB(255, 255, 255)
+               text.TextStrokeTransparency = 0
+               text.Parent = billboard
+
+               local conn = RunService.RenderStepped:Connect(function()
+                  if billboard.Adornee and billboard.Adornee.Parent then
+                     local dist = (LocalPlayer.Character.HumanoidRootPart.Position - billboard.Adornee.Position).Magnitude
+                     text.Text = plr.Name .. "\n" .. math.floor(dist) .. " studs"
+                  end
+               end)
+
+               table.insert(espConnections, {highlight = highlight, billboard = billboard, conn = conn})
+            end
+         end
+         Rayfield:Notify({Title = "Aktif", Content = "ESP aktif!"})
       else
-         Rayfield:Notify({Title = "Hata", Content = "Chat remote bulunamadı."})
+         for _, conn in pairs(espConnections) do
+            if conn.highlight then conn.highlight:Destroy() end
+            if conn.billboard then conn.billboard:Destroy() end
+            if conn.conn then conn.conn:Disconnect() end
+         end
+         espConnections = {}
+         Rayfield:Notify({Title = "Kapalı", Content = "ESP kapatıldı."})
       end
    end,
 })
 
--- Diğer özellikler (ESP, Infinite Jump, Bang, Troll tab) aynı kalıyor
--- ... (önceki kodundan kopyala, yer kaplamasın diye burada kısalttım ama hepsini ekle)
+-- Infinite Jump
+UniTab:CreateToggle({
+   Name = "Infinite Jump",
+   CurrentValue = false,
+   Callback = function(Value)
+      local infJumpConn
+      if Value then
+         infJumpConn = UserInputService.JumpRequest:Connect(function()
+            if LocalPlayer.Character then
+               LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end
+         end)
+         Rayfield:Notify({Title = "Aktif", Content = "Infinite Jump aktif!"})
+      else
+         if infJumpConn then infJumpConn:Disconnect() end
+         Rayfield:Notify({Title = "Kapalı", Content = "Infinite Jump kapatıldı."})
+      end
+   end,
+})
 
-print("Fsien Hub yüklendi! Uzaya Fling, Mobil Fly Panel, Fake Chat aktif.")
+-- Aimbot (kilitlenmiş)
+local aimbotTarget = nil
+UniTab:CreateToggle({
+   Name = "Aimbot (Kamera Kilitlenir)",
+   CurrentValue = false,
+   Callback = function(Value)
+      if Value then
+         local closest, dist = nil, math.huge
+         for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+               local d = (plr.Character.Head.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
+               if d < dist and d < 500 then
+                  closest = plr.Character.Head
+                  dist = d
+               end
+            end
+         end
+
+         if closest then
+            aimbotTarget = closest
+            Rayfield:Notify({Title = "Aktif", Content = "Aimbot kilitlendi!"})
+         else
+            aimbotTarget = nil
+            Rayfield:Notify({Title = "Hedef Yok", Content = "Yakın hedef bulunamadı."})
+         end
+      else
+         aimbotTarget = nil
+         Rayfield:Notify({Title = "Kapalı", Content = "Aimbot kapatıldı."})
+      end
+   end,
+})
+
+RunService.RenderStepped:Connect(function()
+   if aimbotTarget and aimbotTarget.Parent then
+      local cam = workspace.CurrentCamera
+      cam.CFrame = CFrame.lookAt(cam.CFrame.Position, aimbotTarget.Position)
+   end
+end)
+
+-- Bang (Kick + Işınla)
+UniTab:CreateInput({
+   Name = "Bang (Kick + Yanına Işınla)",
+   PlaceholderText = "Kişi adını yaz (benzer olsa yeter)...",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local targetName = Text:lower()
+      for _, plr in pairs(Players:GetPlayers()) do
+         if plr ~= LocalPlayer and (plr.Name:lower():find(targetName) or plr.DisplayName:lower():find(targetName)) then
+            if LocalPlayer.Character and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+               LocalPlayer.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+            end
+            plr:Kick("Fsien Hub tarafından banglandı!")
+            Rayfield:Notify({Title = "Bang", Content = plr.Name .. " yanına ışınlandı ve banglandı!"})
+            break
+         end
+      end
+   end,
+})
+
+-- Troll Bölgesi
+local TrollTab = Window:CreateTab("Troll Bölgesi")
+
+TrollTab:CreateLabel("Troll Özellikleri")
+
+TrollTab:CreateButton({
+   Name = "Fake Ban Mesajı",
+   Callback = function()
+      Rayfield:Notify({Title = "BANLANDIN!", Content = "Sen banlandın! 😈", Duration = 10})
+   end,
+})
+
+TrollTab:CreateButton({
+   Name = "Karakter Spin",
+   Callback = function()
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+         local root = LocalPlayer.Character.HumanoidRootPart
+         spawn(function()
+            for i = 1, 100 do
+               root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(360), 0)
+               wait(0.05)
+            end
+         end)
+         Rayfield:Notify({Title = "Spin", Content = "Karakter dönüyor!"})
+      end
+   end,
+})
+
+TrollTab:CreateButton({
+   Name = "Random Teleport",
+   Callback = function()
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+         local root = LocalPlayer.Character.HumanoidRootPart
+         root.CFrame = CFrame.new(math.random(-500, 500), 100, math.random(-500, 500))
+         Rayfield:Notify({Title = "Teleport", Content = "Rastgele yere ışınlandın!"})
+      end
+   end,
+})
+
+TrollTab:CreateButton({
+   Name = "Loop Ses Troll",
+   Callback = function()
+      spawn(function()
+         while true do
+            wait(0.1)
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://1847661820"
+            sound.Volume = 10
+            sound.Parent = workspace
+            sound:Play()
+            game.Debris:AddItem(sound, 2)
+         end
+      end)
+      Rayfield:Notify({Title = "Loop Ses", Content = "Ses troll başladı!"})
+   end,
+})
+
+-- Steal a Brainrot Tab
+local SabTab = Window:CreateTab("Steal a Brainrot")
+
+SabTab:CreateLabel("20M+ Değerli Brainrot Tarayıcı")
+
+SabTab:CreateButton({
+   Name = "Başlat Tarama & İsimleri Göster",
+   Callback = function()
+      Rayfield:Notify({Title = "Tarama Başladı", Content = "20M+ brainrot aranıyor..."})
+
+      local threshold = 20000000
+      local brainrotList = {}
+
+      for _, obj in pairs(workspace:GetChildren()) do
+         if obj:IsA("Model") and (obj:FindFirstChild("Income") or obj:FindFirstChild("Value")) then
+            local income = 0
+            if obj:FindFirstChild("Income") then income = obj.Income.Value or 0 end
+            if obj:FindFirstChild("Value") then income = obj.Value.Value or 0 end
+
+            if income >= threshold then
+               local name = obj.Name or "Bilinmeyen Brainrot"
+               table.insert(brainrotList, name .. " (Income: " .. income .. ")")
+            end
+         end
+      end
+
+      if #brainrotList > 0 then
+         local msg = "Bu serverde değerli brainrot var!\n\n" .. table.concat(brainrotList, "\n")
+         Rayfield:Notify({Title = "Bulundu!", Content = msg, Duration = 20})
+      else
+         Rayfield:Notify({Title = "Yok", Content = "20M+ yok, hop yapılıyor..."})
+         wait(2)
+         game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+      end
+   end,
+})
+
+SabTab:CreateButton({
+   Name = "Hazır Finder Yükle",
+   Callback = function()
+      loadstring(game:HttpGet("https://raw.githubusercontent.com/r0bloxlucker/sabfinderwithoutdualhook/refs/heads/main/finderv2.lua"))()
+      Rayfield:Notify({Title = "Yüklendi", Content = "Hazır finder aktif!"})
+   end,
+})
+
+print("Fsien Hub yüklendi! Tüm özellikler aktif.")
