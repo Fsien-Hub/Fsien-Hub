@@ -1,4 +1,4 @@
--- Fsien Hub - Delta Executor için (Tüm Özellikler Bir Arada)
+-- Fsien Hub - Delta Executor için (Tüm Özellikler Bir Arada - Son Versiyon)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -14,6 +14,7 @@ local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local SetClipboard = setclipboard or toclipboard or function(text) game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Kopyalandı", Text = text}) end
 
 -- Sağ alt köşede kalıcı Discord mesajı
 local function showDiscordMessage()
@@ -36,7 +37,7 @@ local function showDiscordMessage()
    local text = Instance.new("TextLabel")
    text.Size = UDim2.new(1, 0, 1, 0)
    text.BackgroundTransparency = 1
-   text.Text = "Discord sunucumuza gelmeyi unutmayın!\nbasarısı"
+   text.Text = "discord sunucumuza gelmeyi unutmayın\nbasarısı"
    text.TextColor3 = Color3.fromRGB(255, 255, 255)
    text.TextStrokeTransparency = 0.7
    text.TextStrokeColor3 = Color3.fromRGB(0, 170, 255)
@@ -50,6 +51,14 @@ local function showDiscordMessage()
 end
 
 showDiscordMessage()
+
+-- Script başlayınca Discord linkini otomatik kopyala
+spawn(function()
+   wait(1)
+   local discordLink = "https://discord.gg/xxxxxx"  -- BURAYA KENDİ SUNUCU LİNKİNİ YAZ
+   SetClipboard(discordLink)
+   Rayfield:Notify({Title = "Kopyalandı", Content = "Discord linki kopyalandı: " .. discordLink, Duration = 5})
+end)
 
 -- Universal Hileler Tab
 local UniTab = Window:CreateTab("Universal Hileler")
@@ -127,12 +136,12 @@ UniTab:CreateToggle({
             end
          end
 
-         Rayfield:Notify({Title = "Aktif", Content = "Mobil Tap Fly aktif! Tuşlara dokun."})
+         Rayfield:Notify({Title = "Aktif", Content = "Mobil Tap Fly aktif!"})
       else
-         if flyConnection then flyConnection:Disconnect() flyConnection = nil end
-         if flyBV then flyBV:Destroy() flyBV = nil end
-         if flyBG then flyBG:Destroy() flyBG = nil end
-         if flyGui then flyGui:Destroy() flyGui = nil end
+         if flyConnection then flyConnection:Disconnect() end
+         if flyBV then flyBV:Destroy() end
+         if flyBG then flyBG:Destroy() end
+         if flyGui then flyGui:Destroy() end
          moveDir = Vector3.new()
          Rayfield:Notify({Title = "Kapalı", Content = "Fly kapatıldı."})
       end
@@ -172,7 +181,7 @@ UniTab:CreateToggle({
    end,
 })
 
--- Fling (uzaya uçurma)
+-- Fling (düzeltilmiş - seni uçurmuyor, başkalarını uzaya atıyor)
 local flingActive = false
 UniTab:CreateToggle({
    Name = "Fling (Yakın Oyuncuları Uzaya Fırlat)",
@@ -276,7 +285,7 @@ UniTab:CreateToggle({
    end,
 })
 
--- Aimbot (kilitlenmiş)
+-- Aimbot
 local aimbotTarget = nil
 UniTab:CreateToggle({
    Name = "Aimbot (Kamera Kilitlenir)",
@@ -331,6 +340,62 @@ UniTab:CreateInput({
             Rayfield:Notify({Title = "Bang", Content = plr.Name .. " yanına ışınlandı ve banglandı!"})
             break
          end
+      end
+   end,
+})
+
+-- Hitbox Expander + Red Box
+local hitboxExpanded = false
+local originalSizes = {}
+local redBoxes = {}
+
+UniTab:CreateToggle({
+   Name = "Hitbox Büyütme + Kırmızı Alan",
+   CurrentValue = false,
+   Callback = function(Value)
+      hitboxExpanded = Value
+      if Value then
+         originalSizes = {}
+         redBoxes = {}
+
+         for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+               local root = plr.Character.HumanoidRootPart
+               originalSizes[plr] = root.Size
+
+               root.Size = Vector3.new(15, 15, 15)
+               root.Transparency = 0.7
+
+               local box = Instance.new("BoxHandleAdornment")
+               box.Adornee = root
+               box.Size = root.Size
+               box.Color3 = Color3.fromRGB(255, 0, 0)
+               box.Transparency = 0.6
+               box.AlwaysOnTop = true
+               box.ZIndex = 10
+               box.Parent = root
+
+               redBoxes[plr] = box
+            end
+         end
+
+         Rayfield:Notify({Title = "Aktif", Content = "Hitbox büyütüldü + kırmızı alan gösteriliyor!"})
+      else
+         for plr, size in pairs(originalSizes) do
+            if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+               plr.Character.HumanoidRootPart.Size = size
+               plr.Character.HumanoidRootPart.Transparency = 0
+            end
+         end
+
+         for _, box in pairs(redBoxes) do
+            if box then box:Destroy() end
+         end
+
+         originalSizes = {}
+         redBoxes = {}
+
+         Rayfield:Notify({Title = "Kapalı", Content = "Hitbox normale döndü."})
       end
    end,
 })
