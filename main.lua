@@ -1,4 +1,4 @@
--- Fsien Hub - Delta Executor için (Düzeltilmiş Fly + Noclip + Fling + ESP + Infinite Jump + Aimbot + Bang + Brainrot)
+-- Fsien Hub - Delta Executor için (Uzaya Fling + Diğer Özellikler)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -13,11 +13,29 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 -- Universal Hileler Tab
 local UniTab = Window:CreateTab("Universal Hileler")
 
--- Düzeltilmiş Fly (mobil/PC uyumlu, kamera yönü + hız slider)
+-- Speed Hack
+local currentSpeed = 16
+UniTab:CreateSlider({
+   Name = "Yürüme Hızı (Speed Hack)",
+   Range = {16, 300},
+   Increment = 10,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Callback = function(Value)
+      currentSpeed = Value
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+         LocalPlayer.Character.Humanoid.WalkSpeed = Value
+      end
+      Rayfield:Notify({Title = "Speed Güncellendi", Content = "Yeni hız: " .. Value})
+   end,
+})
+
+-- Fly (önceki düzeltilmiş hali)
 local flySpeed = 50
 local flying = false
 local flyBV, flyBG, flyConnection
@@ -46,7 +64,6 @@ UniTab:CreateToggle({
             local cam = workspace.CurrentCamera
             local moveDir = Vector3.new()
 
-            -- PC için WASD + Space/Ctrl
             if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
             if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
             if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
@@ -79,6 +96,26 @@ UniTab:CreateSlider({
    end,
 })
 
+-- Infinite Jump
+UniTab:CreateToggle({
+   Name = "Infinite Jump (Sonsuz Zıplama)",
+   CurrentValue = false,
+   Callback = function(Value)
+      local infJumpConn
+      if Value then
+         infJumpConn = UserInputService.JumpRequest:Connect(function()
+            if LocalPlayer.Character then
+               LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end
+         end)
+         Rayfield:Notify({Title = "Aktif", Content = "Infinite Jump aktif!"})
+      else
+         if infJumpConn then infJumpConn:Disconnect() end
+         Rayfield:Notify({Title = "Kapalı", Content = "Infinite Jump kapatıldı."})
+      end
+   end,
+})
+
 -- Noclip
 UniTab:CreateToggle({
    Name = "Noclip (Duvarlardan Geçme)",
@@ -101,22 +138,22 @@ UniTab:CreateToggle({
    end,
 })
 
--- Fling (toggle - aktifken karakter etrafında fırlatma alanı)
+-- Düzeltilmiş Fling (Toggle - aktifken yakın oyuncuları UZAYA fırlatır)
 local flingActive = false
 UniTab:CreateToggle({
-   Name = "Fling (Aktifken Yakın Oyuncuları Fırlat)",
+   Name = "Fling (Aktifken Yakın Oyuncuları Uzaya Fırlat)",
    CurrentValue = false,
    Callback = function(Value)
       flingActive = Value
       if Value then
-         Rayfield:Notify({Title = "Aktif", Content = "Fling aktif! Yakın oyuncular fırlatılacak."})
+         Rayfield:Notify({Title = "Aktif", Content = "Uzaya Fling aktif! Yakın oyuncular uzaya uçuyor."})
       else
          Rayfield:Notify({Title = "Kapalı", Content = "Fling kapatıldı."})
       end
    end,
 })
 
--- Fling loop (toggle açıkken çalışır)
+-- Fling loop (toggle açıkken çalışır - uzaya fırlatma)
 RunService.Heartbeat:Connect(function()
    if flingActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
       local root = LocalPlayer.Character.HumanoidRootPart
@@ -124,15 +161,17 @@ RunService.Heartbeat:Connect(function()
          if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
             local targetRoot = plr.Character.HumanoidRootPart
             local dist = (targetRoot.Position - root.Position).Magnitude
-            if dist < 15 then  -- 15 studs mesafe içinde
-               targetRoot.Velocity = (targetRoot.Position - root.Position).Unit * 200 + Vector3.new(0, 100, 0)  -- yukarı + ileri fırlatma
+            if dist < 20 then  -- 20 studs mesafe içinde
+               -- Uzaya fırlatma: yüksek yukarı + rastgele yön
+               local flingForce = Vector3.new(math.random(-100,100), 500, math.random(-100,100))
+               targetRoot.Velocity = flingForce
             end
          end
       end
    end
 end)
 
--- ESP (düzeltilmiş, kapatınca temizlenir + distance ekli)
+-- ESP (düzeltilmiş, distance + temiz kapanma)
 local espConnections = {}
 UniTab:CreateToggle({
    Name = "ESP (Duvar Arkasından + Distance)",
@@ -162,7 +201,6 @@ UniTab:CreateToggle({
                text.TextStrokeTransparency = 0
                text.Parent = billboard
 
-               -- Update distance her frame
                local conn = RunService.RenderStepped:Connect(function()
                   if billboard.Adornee and billboard.Adornee.Parent then
                      local dist = (LocalPlayer.Character.HumanoidRootPart.Position - billboard.Adornee.Position).Magnitude
@@ -173,7 +211,7 @@ UniTab:CreateToggle({
                table.insert(espConnections, {highlight = highlight, billboard = billboard, conn = conn})
             end
          end
-         Rayfield:Notify({Title = "Aktif", Content = "ESP aktif! İsim + Distance gösteriliyor."})
+         Rayfield:Notify({Title = "Aktif", Content = "ESP aktif!"})
       else
          for _, conn in pairs(espConnections) do
             if conn.highlight then conn.highlight:Destroy() end
@@ -198,7 +236,7 @@ UniTab:CreateToggle({
                LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
             end
          end)
-         Rayfield:Notify({Title = "Aktif", Content = "Infinite Jump aktif! Boşluk tuşuna basmaya devam et."})
+         Rayfield:Notify({Title = "Aktif", Content = "Infinite Jump aktif!"})
       else
          if infJumpConn then infJumpConn:Disconnect() end
          Rayfield:Notify({Title = "Kapalı", Content = "Infinite Jump kapatıldı."})
@@ -206,57 +244,124 @@ UniTab:CreateToggle({
    end,
 })
 
--- Aimbot (basit, en yakın oyuncuya nişan al - toggle)
-local aimbotActive = false
+-- Aimbot (kilitlenmiş, ayrılmıyor)
+local aimbotTarget = nil
 UniTab:CreateToggle({
-   Name = "Aimbot (En Yakına Nişan Al)",
+   Name = "Aimbot (Kamera Hedefe Kilitlenir)",
    CurrentValue = false,
    Callback = function(Value)
-      aimbotActive = Value
       if Value then
-         Rayfield:Notify({Title = "Aktif", Content = "Aimbot aktif! Fare en yakına dönecek."})
+         local closest, dist = nil, math.huge
+         for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+               local d = (plr.Character.Head.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
+               if d < dist and d < 500 then
+                  closest = plr.Character.Head
+                  dist = d
+               end
+            end
+         end
+
+         if closest then
+            aimbotTarget = closest
+            Rayfield:Notify({Title = "Aktif", Content = "Aimbot kilitlendi! Kamera ayrılmayacak."})
+         else
+            aimbotTarget = nil
+            Rayfield:Notify({Title = "Hedef Yok", Content = "Yakın hedef bulunamadı."})
+         end
       else
+         aimbotTarget = nil
          Rayfield:Notify({Title = "Kapalı", Content = "Aimbot kapatıldı."})
       end
    end,
 })
 
 RunService.RenderStepped:Connect(function()
-   if aimbotActive and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-      local closest, dist = nil, math.huge
-      for _, plr in pairs(Players:GetPlayers()) do
-         if plr ~= LocalPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
-            local d = (plr.Character.Head.Position - workspace.CurrentCamera.CFrame.Position).Magnitude
-            if d < dist then
-               closest = plr.Character.Head
-               dist = d
-            end
-         end
-      end
-      if closest then
-         workspace.CurrentCamera.CFrame = CFrame.lookAt(workspace.CurrentCamera.CFrame.Position, closest.Position)
-      end
+   if aimbotTarget and aimbotTarget.Parent then
+      local cam = workspace.CurrentCamera
+      cam.CFrame = CFrame.lookAt(cam.CFrame.Position, aimbotTarget.Position)
    end
 end)
 
--- Bang (Kick/Ban) - kişi adına göre (ban için oyun sahibi yetkisi lazım, genelde kick çalışır)
+-- Bang (Kick + Yanına Işınla) - benzer isim bile olsa çalışır
 UniTab:CreateInput({
-   Name = "Bang (Kick) - Kişi Adı Yaz",
-   PlaceholderText = "Kişi adını yaz...",
+   Name = "Bang (Kick + Yanına Işınla)",
+   PlaceholderText = "Kişi adını yaz (benzer olsa yeter)...",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text)
       local targetName = Text:lower()
       for _, plr in pairs(Players:GetPlayers()) do
-         if plr.Name:lower():find(targetName) or plr.DisplayName:lower():find(targetName) then
+         if plr ~= LocalPlayer and (plr.Name:lower():find(targetName) or plr.DisplayName:lower():find(targetName)) then
+            -- Yanına ışınla
+            if LocalPlayer.Character and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+               LocalPlayer.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame + Vector3.new(0, 5, 0)
+            end
             plr:Kick("Fsien Hub tarafından banglandı!")
-            Rayfield:Notify({Title = "Bang", Content = plr.Name .. " banglandı!"})
+            Rayfield:Notify({Title = "Bang", Content = plr.Name .. " yanına ışınlandı ve banglandı!"})
             break
          end
       end
    end,
 })
 
--- Steal a Brainrot Tab (önceki hali)
+-- Troll Bölgesi Tab
+local TrollTab = Window:CreateTab("Troll Bölgesi")
+
+TrollTab:CreateLabel("Troll Özellikleri (Eğlence İçin)")
+
+TrollTab:CreateButton({
+   Name = "Fake Ban Mesajı Gönder (Kendine)",
+   Callback = function()
+      Rayfield:Notify({Title = "BANLANDIN!", Content = "Sen banlandın! Oyun sahibine bildirildi. 😈", Duration = 10})
+   end,
+})
+
+TrollTab:CreateButton({
+   Name = "Karakter Spin (Dönme Troll)",
+   Callback = function()
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+         local root = LocalPlayer.Character.HumanoidRootPart
+         spawn(function()
+            for i = 1, 100 do
+               root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(360), 0)
+               wait(0.05)
+            end
+         end)
+         Rayfield:Notify({Title = "Spin", Content = "Karakter dönüyor!"})
+      end
+   end,
+})
+
+TrollTab:CreateButton({
+   Name = "Random Teleport (Rastgele Işınlan)",
+   Callback = function()
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+         local root = LocalPlayer.Character.HumanoidRootPart
+         root.CFrame = CFrame.new(math.random(-500, 500), 100, math.random(-500, 500))
+         Rayfield:Notify({Title = "Troll Teleport", Content = "Rastgele yere ışınlandın!"})
+      end
+   end,
+})
+
+TrollTab:CreateButton({
+   Name = "Loop Ses Troll (Kulaklık Patlat)",
+   Callback = function()
+      spawn(function()
+         while true do
+            wait(0.1)
+            local sound = Instance.new("Sound")
+            sound.SoundId = "rbxassetid://1847661820"  -- yüksek meme ses
+            sound.Volume = 10
+            sound.Parent = workspace
+            sound:Play()
+            game.Debris:AddItem(sound, 2)
+         end
+      end)
+      Rayfield:Notify({Title = "Loop Ses", Content = "Ses troll başladı! (Durmak için oyunu yeniden başlat.)"})
+   end,
+})
+
+-- Steal a Brainrot Tab
 local SabTab = Window:CreateTab("Steal a Brainrot")
 
 SabTab:CreateLabel("20M+ Değerli Brainrot Tarayıcı")
@@ -301,4 +406,4 @@ SabTab:CreateButton({
    end,
 })
 
-print("Fsien Hub yüklendi! Tüm özellikler aktif.")
+print("Fsien Hub yüklendi! Uzaya Fling aktif.")
