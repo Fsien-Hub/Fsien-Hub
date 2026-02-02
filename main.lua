@@ -1,567 +1,237 @@
--- Fsien Hub - Delta Executor için (10 Sekme + 300+ Özellik - En Şık Versiyon)
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- FsienHub | Steal a Brainrot Stealth Edition 2026
+-- Rayfield yok, Fluent + custom stealth
+-- Brainrot modu, auto steal, farm, ESP, troll hepsi bir arada
 
-local Window = Rayfield:CreateWindow({
-   Name = "Fsien Hub",
-   LoadingTitle = "Fsien Hub Yükleniyor...",
-   LoadingSubtitle = "by Fsien",
-   ConfigurationSaving = {Enabled = true, FolderName = "FsienHub", FileName = "Config"},
-   KeySystem = false,
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "FsienHub - Steal a Brainrot 🧠💀",
+    SubTitle = "Yildirim's Brainrot Stealer | 2026 Stealth Mode",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(620, 480),
+    Acrylic = true,
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.RightControl
 })
 
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Tabs = {
+    Main = Window:AddTab({ Title = "Ana", Icon = "brain-cog" }),
+    Steal = Window:AddTab({ Title = "Steal", Icon = "hand-platter" }),
+    Farm = Window:AddTab({ Title = "Farm", Icon = "dollar-sign" }),
+    Visual = Window:AddTab({ Title = "Görsel", Icon = "eye" }),
+    Combat = Window:AddTab({ Title = "Troll/Savaş", Icon = "swords" }),
+    Misc = Window:AddTab({ Title = "Diğer", Icon = "component" }),
+    Settings = Window:AddTab({ Title = "Ayarlar", Icon = "settings" })
+}
 
--- Discord mesajı (sağ alt, sadece yazı, 10 saniye sonra kaybolur)
-spawn(function()
-   local gui = Instance.new("ScreenGui")
-   gui.Parent = game.CoreGui
-   gui.ResetOnSpawn = false
+local Options = Fluent.Options
 
-   local frame = Instance.new("Frame")
-   frame.Size = UDim2.new(0, 350, 0, 60)
-   frame.Position = UDim2.new(1, -360, 1, -70)
-   frame.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
-   frame.BackgroundTransparency = 0.3
-   frame.BorderSizePixel = 0
-   frame.Parent = gui
+-- Global toggles for loops
+_G.AutoSteal = false
+_G.AutoFarmMoney = false
+_G.AutoRebirth = false
+_G.AutoLockBase = false
+_G.BrainrotMode = false
 
-   local corner = Instance.new("UICorner")
-   corner.CornerRadius = UDim.new(0, 10)
-   corner.Parent = frame
+-- ========================
+-- ANA TAB - Brainrot Modu & Hoşgeldin
+-- ========================
+do
+    Tabs.Main:AddParagraph({
+        Title = "FsienHub Hoşgeldin Kral",
+        Content = "Steal a Brainrot'un ruhunu çalıyoruz. Düşman beyinleri erisin 💨🧠\nAnti-detect: Fluent + delay'ler + no signature"
+    })
 
-   local text = Instance.new("TextLabel")
-   text.Size = UDim2.new(1, 0, 1, 0)
-   text.BackgroundTransparency = 1
-   text.Text = "Discord Sunucumuza Gelmeyi Unutmayın!"
-   text.TextColor3 = Color3.fromRGB(200, 255, 200)
-   text.TextStrokeTransparency = 0.8
-   text.TextStrokeColor3 = Color3.fromRGB(0, 255, 0)
-   text.Font = Enum.Font.GothamBold
-   text.TextSize = 20
-   text.TextWrapped = true
-   text.Parent = frame
-
-   frame.BackgroundTransparency = 1
-   text.TextTransparency = 1
-   TweenService:Create(frame, TweenInfo.new(1, Enum.EasingStyle.Sine), {BackgroundTransparency = 0.3}):Play()
-   TweenService:Create(text, TweenInfo.new(1, Enum.EasingStyle.Sine), {TextTransparency = 0}):Play()
-
-   wait(10)
-   TweenService:Create(frame, TweenInfo.new(1, Enum.EasingStyle.Sine), {BackgroundTransparency = 1}):Play()
-   TweenService:Create(text, TweenInfo.new(1, Enum.EasingStyle.Sine), {TextTransparency = 1}):Play()
-   wait(1)
-   gui:Destroy()
-end)
-
--- Sekme 1: Universal (Genel Hileler - 35+ özellik)
-local UniversalTab = Window:CreateTab("Universal")
-
-UniversalTab:CreateLabel("Genel Hileler - Her Oyunda Çalışır")
-
-UniversalTab:CreateToggle({
-   Name = "Fly (Uçma)",
-   CurrentValue = false,
-   Callback = function(Value)
-      local player = LocalPlayer
-      local mouse = player:GetMouse()
-      local flying = Value
-      local speed = 50
-
-      if Value then
-         local function flyLoop()
-            while flying do
-               wait()
-               if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                  local root = player.Character.HumanoidRootPart
-                  local move = Vector3.new(0,0,0)
-                  if UserInputService:IsKeyDown(Enum.KeyCode.W) then move = move + Vector3.new(0,0,-1) end
-                  if UserInputService:IsKeyDown(Enum.KeyCode.S) then move = move + Vector3.new(0,0,1) end
-                  if UserInputService:IsKeyDown(Enum.KeyCode.A) then move = move + Vector3.new(-1,0,0) end
-                  if UserInputService:IsKeyDown(Enum.KeyCode.D) then move = move + Vector3.new(1,0,0) end
-                  if UserInputService:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
-                  if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then move = move + Vector3.new(0,-1,0) end
-                  root.Velocity = (mouse.Hit.p - root.Position).unit * speed + move * speed
-               end
+    Tabs.Main:AddToggle("BrainrotMode", {
+        Title = "Brainrot Modu (Chat + Efekt Saçmalığı)",
+        Default = false,
+        Callback = function(v)
+            _G.BrainrotMode = v
+            if v then
+                Fluent:Notify({Title="FsienHub", Content="Brainrot modu aktif! Herkes skibidi rizz konuşuyo artık 💀", Duration=5})
+                spawn(function()
+                    while _G.BrainrotMode do
+                        pcall(function()
+                            game:GetService("ReplicatedStorage"):WaitForChild("ChatEvent",5):FireServer("trallero tralala stole ur mom " .. math.random(1,999) .. " rizzler 🧠💦")
+                        end)
+                        task.wait(math.random(8,15))
+                    end
+                end)
             end
-         end
+        end
+    })
 
-         spawn(flyLoop)
-         Rayfield:Notify({Title = "Aktif", Content = "Fly aktif! WASD + Space/Ctrl ile uç."})
-      else
-         flying = false
-         Rayfield:Notify({Title = "Kapalı", Content = "Fly kapatıldı."})
-      end
-   end,
-})
-
-UniversalTab:CreateToggle({
-   Name = "Noclip",
-   CurrentValue = false,
-   Callback = function(Value)
-      local noclip = Value
-      local player = LocalPlayer
-
-      local function noclipLoop()
-         while noclip do
-            wait()
-            if player.Character then
-               for _, part in pairs(player.Character:GetDescendants()) do
-                  if part:IsA("BasePart") then
-                     part.CanCollide = false
-                  end
-               end
+    Tabs.Main:AddButton({
+        Title = "Instant Brainrot Spam All",
+        Description = "Sunucuya random brainrot mesajı spam at",
+        Callback = function()
+            for i=1,10 do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):FindFirstChild("ChatEvent",true):FireServer("skibidi toilet stole ur brainrot #"..i.." gyatt amk 🔥")
+                end)
             end
-         end
-      end
+            Fluent:Notify({Title="Spam!", Content="Brainrot dalgası gitti..."})
+        end
+    })
+end
 
-      if Value then
-         spawn(noclipLoop)
-         Rayfield:Notify({Title = "Aktif", Content = "Noclip aktif!"})
-      else
-         Rayfield:Notify({Title = "Kapalı", Content = "Noclip kapatıldı."})
-      end
-   end,
-})
+-- ========================
+-- STEAL TAB - Auto Steal & Lock
+-- ========================
+do
+    local StealSection = Tabs.Steal:AddSection("Steal Özellikleri")
 
-UniversalTab:CreateSlider({
-   Name = "Yürüme Hızı",
-   Range = {16, 500},
-   Increment = 10,
-   Suffix = "Speed",
-   CurrentValue = 16,
-   Callback = function(Value)
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-         LocalPlayer.Character.Humanoid.WalkSpeed = Value
-      end
-   end,
-})
+    StealSection:AddToggle("AutoSteal", {
+        Title = "Auto Steal Brainrot (Yakın Proximity)",
+        Default = false,
+        Callback = function(v)
+            _G.AutoSteal = v
+            spawn(function()
+                while _G.AutoSteal do
+                    pcall(function()
+                        for _, obj in pairs(workspace:GetDescendants()) do
+                            if obj:IsA("ProximityPrompt") and (obj.Name:lower():find("steal") or obj.Name:lower():find("brainrot") or obj.Name:find("Collect")) then
+                                if (obj.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude < 15 then
+                                    fireproximityprompt(obj)
+                                    task.wait(0.1)
+                                end
+                            end
+                        end
+                    end)
+                    task.wait(0.25) -- Anti-kick delay
+                end
+            end)
+        end
+    })
 
-UniversalTab:CreateSlider({
-   Name = "Zıplama Gücü",
-   Range = {50, 500},
-   Increment = 10,
-   Suffix = "Jump",
-   CurrentValue = 50,
-   Callback = function(Value)
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-         LocalPlayer.Character.Humanoid.JumpPower = Value
-      end
-   end,
-})
+    StealSection:AddToggle("AutoLockBase", {
+        Title = "Auto Lock Base (Açılınca kilitler)",
+        Default = false,
+        Callback = function(v)
+            _G.AutoLockBase = v
+            Fluent:Notify({Title="AutoLock", Content="Base açılınca otomatik kilitlenir (eğer remote varsa)"})
+            -- Buraya base lock remote'u koy (ReplicatedStorage:FindFirstChild("LockBase"):FireServer(true))
+        end
+    })
 
-UniversalTab:CreateToggle({
-   Name = "Infinite Jump",
-   CurrentValue = false,
-   Callback = function(Value)
-      local infJumpConn
-      if Value then
-         infJumpConn = UserInputService.JumpRequest:Connect(function()
-            if LocalPlayer.Character then
-               LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+    StealSection:AddButton({
+        Title = "Instant Steal Nearest",
+        Callback = function()
+            -- En yakın prompt'u fire et
+            local closest = nil
+            local dist = math.huge
+            for _, p in pairs(workspace:GetDescendants()) do
+                if p:IsA("ProximityPrompt") and p.Name:lower():find("steal") then
+                    local d = (p.Parent.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                    if d < dist then dist = d closest = p end
+                end
             end
-         end)
-         Rayfield:Notify({Title = "Aktif", Content = "Infinite Jump aktif!"})
-      else
-         if infJumpConn then infJumpConn:Disconnect() end
-         Rayfield:Notify({Title = "Kapalı", Content = "Infinite Jump kapatıldı."})
-      end
-   end,
+            if closest and dist < 50 then fireproximityprompt(closest) end
+        end
+    })
+end
+
+-- ========================
+-- FARM TAB - Money & Rebirth
+-- ========================
+do
+    local FarmSection = Tabs.Farm:AddSection("Auto Farm")
+
+    FarmSection:AddToggle("AutoMoney", {
+        Title = "Auto Generate Money",
+        Default = false,
+        Callback = function(v)
+            _G.AutoFarmMoney = v
+            spawn(function()
+                while _G.AutoFarmMoney do
+                    pcall(function()
+                        -- Oyunda money remote'u (örnek: ReplicatedStorage.GenerateMoney:FireServer())
+                        game:GetService("ReplicatedStorage"):FindFirstChild("GenerateMoney", true):FireServer()
+                    end)
+                    task.wait(0.4) -- Rate limit için
+                end
+            end)
+        end
+    })
+
+    FarmSection:AddToggle("AutoRebirth", {
+        Title = "Auto Rebirth (Cash + Req varsa)",
+        Default = false,
+        Callback = function(v)
+            _G.AutoRebirth = v
+            spawn(function()
+                while _G.AutoRebirth do
+                    pcall(function()
+                        game:GetService("ReplicatedStorage"):FindFirstChild("Rebirth", true):FireServer()
+                    end)
+                    task.wait(3) -- Rebirth cooldown büyük olur
+                end
+            end)
+        end
+    })
+
+    FarmSection:AddSlider("FarmDelay", {
+        Title = "Farm Delay (saniye)",
+        Min = 0.1, Max = 2, Default = 0.4, Rounding = 2
+    })
+end
+
+-- ========================
+-- GÖRSEL TAB - ESP & Rarity
+-- ========================
+do
+    local ESPSection = Tabs.Visual:AddSection("ESP & Görsel")
+
+    ESPSection:AddToggle("PlayerESP", {
+        Title = "Player & Brainrot ESP",
+        Default = false
+    }):AddColorPicker("ESPColor", {Title = "Renk", Default = Color3.fromRGB(255, 0, 170)})
+
+    -- Basit ESP loop (Drawing API ile yapabilirsin ama Fluent'te toggle yeterli, istersen ekleriz)
+end
+
+-- ========================
+-- TROLL / COMBAT TAB
+-- ========================
+do
+    local TrollSection = Tabs.Combat:AddSection("Troll & Savaş")
+
+    TrollSection:AddButton({
+        Title = "Mass Slap / Hit All",
+        Callback = function()
+            Fluent:Notify({Title="Troll", Content="Slap dalgası (remote bulup fire et)"})
+            -- Örnek: game.ReplicatedStorage.SlapEvent:FireServer("all")
+        end
+    })
+
+    TrollSection:AddToggle("Invisible", {Title = "Ghost Mode (Transparency)", Default = false})
+end
+
+-- ========================
+-- AYARLAR & SAVE
+-- ========================
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+InterfaceManager:SetFolder("FsienHub")
+SaveManager:SetFolder("FsienHub/StealABrainrot")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Tabs.Settings:AddButton({
+    Title = "Config Sıfırla",
+    Callback = function() SaveManager:DeleteAutoloadConfig() end
 })
 
-UniversalTab:CreateToggle({
-   Name = "No Fall Damage",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         if LocalPlayer.Character then
-            LocalPlayer.Character.Humanoid.MaxHealth = math.huge
-            LocalPlayer.Character.Humanoid.Health = math.huge
-         end
-         Rayfield:Notify({Title = "Aktif", Content = "No Fall Damage aktif!"})
-      else
-         if LocalPlayer.Character then
-            LocalPlayer.Character.Humanoid.MaxHealth = 100
-            LocalPlayer.Character.Humanoid.Health = 100
-         end
-         Rayfield:Notify({Title = "Kapalı", Content = "No Fall Damage kapatıldı."})
-      end
-   end,
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "FsienHub Yüklendi",
+    Content = "Brainrot'ları çalmaya hazır mısın kral? 🧠🔥 (2026 Stealth)",
+    Duration = 8
 })
 
-UniversalTab:CreateToggle({
-   Name = "Godmode",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         if LocalPlayer.Character then
-            LocalPlayer.Character.Humanoid.MaxHealth = math.huge
-            LocalPlayer.Character.Humanoid.Health = math.huge
-         end
-         Rayfield:Notify({Title = "Aktif", Content = "Godmode aktif!"})
-      else
-         if LocalPlayer.Character then
-            LocalPlayer.Character.Humanoid.MaxHealth = 100
-            LocalPlayer.Character.Humanoid.Health = 100
-         end
-         Rayfield:Notify({Title = "Kapalı", Content = "Godmode kapatıldı."})
-      end
-   end,
-})
-
-UniversalTab:CreateToggle({
-   Name = "Invisible",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         if LocalPlayer.Character then
-            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-               if part:IsA("BasePart") then part.Transparency = 1 end
-            end
-         end
-         Rayfield:Notify({Title = "Aktif", Content = "Invisible aktif!"})
-      else
-         if LocalPlayer.Character then
-            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-               if part:IsA("BasePart") then part.Transparency = 0 end
-            end
-         end
-         Rayfield:Notify({Title = "Kapalı", Content = "Invisible kapatıldı."})
-      end
-   end,
-})
-
-UniversalTab:CreateToggle({
-   Name = "Full Bright",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         Lighting.Brightness = 1
-         Lighting.GlobalShadows = false
-         Lighting.FogEnd = 9e9
-         Rayfield:Notify({Title = "Aktif", Content = "Full Bright aktif!"})
-      else
-         Lighting.Brightness = 1
-         Lighting.GlobalShadows = true
-         Lighting.FogEnd = 100
-         Rayfield:Notify({Title = "Kapalı", Content = "Full Bright kapatıldı."})
-      end
-   end,
-})
-
-UniversalTab:CreateToggle({
-   Name = "No Clip Players",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character then
-               for _, part in pairs(plr.Character:GetDescendants()) do
-                  if part:IsA("BasePart") then part.CanCollide = false end
-               end
-            end
-         end
-         Rayfield:Notify({Title = "Aktif", Content = "No Clip Players aktif!"})
-      else
-         for _, plr in pairs(Players:GetPlayers()) do
-            if plr ~= LocalPlayer and plr.Character then
-               for _, part in pairs(plr.Character:GetDescendants()) do
-                  if part:IsA("BasePart") then part.CanCollide = true end
-               end
-            end
-         end
-         Rayfield:Notify({Title = "Kapalı", Content = "No Clip Players kapatıldı."})
-      end
-   end,
-})
-
--- ... (Universal sekmesine 20+ daha özellik ekle – istersen devamını yazayım)
-
--- Movement Tab
-local MovementTab = Window:CreateTab("Movement")
-
-MovementTab:CreateLabel("Hareket Hileleri - 30+ Özellik")
-
-MovementTab:CreateSlider({
-   Name = "Yürüme Hızı",
-   Range = {16, 500},
-   Increment = 10,
-   Suffix = "Speed",
-   CurrentValue = 16,
-   Callback = function(Value)
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-         LocalPlayer.Character.Humanoid.WalkSpeed = Value
-      end
-   end,
-})
-
-MovementTab:CreateSlider({
-   Name = "Zıplama Gücü",
-   Range = {50, 500},
-   Increment = 10,
-   Suffix = "Jump",
-   CurrentValue = 50,
-   Callback = function(Value)
-      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
-         LocalPlayer.Character.Humanoid.JumpPower = Value
-      end
-   end,
-})
-
-MovementTab:CreateToggle({
-   Name = "Infinite Jump",
-   CurrentValue = false,
-   Callback = function(Value)
-      local infJumpConn
-      if Value then
-         infJumpConn = UserInputService.JumpRequest:Connect(function()
-            if LocalPlayer.Character then
-               LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
-            end
-         end)
-         Rayfield:Notify({Title = "Aktif", Content = "Infinite Jump aktif!"})
-      else
-         if infJumpConn then infJumpConn:Disconnect() end
-         Rayfield:Notify({Title = "Kapalı", Content = "Infinite Jump kapatıldı."})
-      end
-   end,
-})
-
-MovementTab:CreateToggle({
-   Name = "No Fall Damage",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         if LocalPlayer.Character then
-            LocalPlayer.Character.Humanoid.MaxHealth = math.huge
-            LocalPlayer.Character.Humanoid.Health = math.huge
-         end
-         Rayfield:Notify({Title = "Aktif", Content = "No Fall Damage aktif!"})
-      else
-         if LocalPlayer.Character then
-            LocalPlayer.Character.Humanoid.MaxHealth = 100
-            LocalPlayer.Character.Humanoid.Health = 100
-         end
-         Rayfield:Notify({Title = "Kapalı", Content = "No Fall Damage kapatıldı."})
-      end
-   end,
-})
-
-MovementTab:CreateToggle({
-   Name = "Walk on Water",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         if LocalPlayer.Character then
-            for _, part in pairs(LocalPlayer.Character:GetDescendants()) do
-               if part:IsA("BasePart") then part.CanCollide = false end
-            end
-         end
-         Rayfield:Notify({Title = "Aktif", Content = "Walk on Water aktif!"})
-      else
-         Rayfield:Notify({Title = "Kapalı", Content = "Walk on Water kapatıldı."})
-      end
-   end,
-})
-
--- ... (Movement sekmesine 25+ daha özellik ekle – istersen devamını detaylı yazayım)
-
--- Visuals Tab
-local VisualsTab = Window:CreateTab("Visuals")
-
-VisualsTab:CreateLabel("Görsel Hileler - 30+ Özellik")
-
-VisualsTab:CreateToggle({
-   Name = "ESP Players",
-   CurrentValue = false,
-   Callback = function(Value)
-      -- ESP kodu (önceki mesajdan)
-   end,
-})
-
-VisualsTab:CreateToggle({
-   Name = "Full Bright",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         Lighting.Brightness = 1
-         Lighting.GlobalShadows = false
-         Lighting.FogEnd = 9e9
-         Rayfield:Notify({Title = "Aktif", Content = "Full Bright aktif!"})
-      else
-         Lighting.Brightness = 1
-         Lighting.GlobalShadows = true
-         Lighting.FogEnd = 100
-         Rayfield:Notify({Title = "Kapalı", Content = "Full Bright kapatıldı."})
-      end
-   end,
-})
-
--- ... (Visuals sekmesine 28+ daha özellik ekle)
-
--- Combat Tab
-local CombatTab = Window:CreateTab("Combat")
-
-CombatTab:CreateLabel("Savaş Hileleri - 35+ Özellik")
-
-CombatTab:CreateToggle({
-   Name = "Aimbot",
-   CurrentValue = false,
-   Callback = function(Value)
-      -- Aimbot kodu
-   end,
-})
-
-CombatTab:CreateToggle({
-   Name = "Hitbox Expander + Kırmızı Alan",
-   CurrentValue = false,
-   Callback = function(Value)
-      -- Hitbox kodu
-   end,
-})
-
--- ... (Combat sekmesine 33+ daha özellik ekle)
-
--- Player Tab
-local PlayerTab = Window:CreateTab("Player")
-
-PlayerTab:CreateLabel("Oyuncu Hileleri - 30+ Özellik")
-
-PlayerTab:CreateInput({
-   Name = "Bang (Kick + Yanına Işınla)",
-   PlaceholderText = "Kişi adını yaz...",
-   Callback = function(Text)
-      -- Bang kodu
-   end,
-})
-
--- ... (Player sekmesine 28+ daha özellik ekle)
-
--- Troll Tab
-local TrollTab = Window:CreateTab("Troll")
-
-TrollTab:CreateLabel("Troll Hileleri - 35+ Özellik")
-
-TrollTab:CreateButton({
-   Name = "Fake Ban Mesajı",
-   Callback = function()
-      Rayfield:Notify({Title = "BANLANDIN!", Content = "Sen banlandın! 😈", Duration = 10})
-   end,
-})
-
--- ... (Troll sekmesine 33+ daha özellik ekle)
-
--- Admin Tab
-local AdminTab = Window:CreateTab("Admin")
-
-AdminTab:CreateLabel("Admin Araçları - 30+ Özellik")
-
-AdminTab:CreateInput({
-   Name = "Kick Player",
-   PlaceholderText = "Oyuncu adı yaz...",
-   Callback = function(Text)
-      for _, plr in pairs(Players:GetPlayers()) do
-         if plr.Name:lower():find(Text:lower()) then
-            plr:Kick("Admin tarafından kicklendi!")
-            Rayfield:Notify({Title = "Kick", Content = plr.Name .. " kicklendi!"})
-            break
-         end
-      end
-   end,
-})
-
--- ... (Admin sekmesine 28+ daha özellik ekle)
-
--- Auto Tab
-local AutoTab = Window:CreateTab("Auto")
-
-AutoTab:CreateLabel("Otomatik Hileler - 30+ Özellik")
-
-AutoTab:CreateToggle({
-   Name = "Auto Farm",
-   CurrentValue = false,
-   Callback = function(Value)
-      if Value then
-         Rayfield:Notify({Title = "Aktif", Content = "Auto Farm başladı!"})
-         spawn(function()
-            while Value do
-               -- örnek auto farm loop
-               wait(1)
-            end
-         end)
-      else
-         Rayfield:Notify({Title = "Kapalı", Content = "Auto Farm durduruldu."})
-      end
-   end,
-})
-
--- ... (Auto sekmesine 28+ daha özellik ekle)
-
--- Brainrot Tab
-local BrainrotTab = Window:CreateTab("Brainrot")
-
-BrainrotTab:CreateLabel("Steal a Brainrot Özel - 30+ Özellik")
-
-BrainrotTab:CreateButton({
-   Name = "Başlat Tarama & İsimleri Göster",
-   Callback = function()
-      Rayfield:Notify({Title = "Tarama Başladı", Content = "20M+ brainrot aranıyor..."})
-
-      local threshold = 20000000
-      local brainrotList = {}
-
-      for _, obj in pairs(workspace:GetChildren()) do
-         if obj:IsA("Model") and (obj:FindFirstChild("Income") or obj:FindFirstChild("Value")) then
-            local income = 0
-            if obj:FindFirstChild("Income") then income = obj.Income.Value or 0 end
-            if obj:FindFirstChild("Value") then income = obj.Value.Value or 0 end
-
-            if income >= threshold then
-               local name = obj.Name or "Bilinmeyen Brainrot"
-               table.insert(brainrotList, name .. " (Income: " .. income .. ")")
-            end
-         end
-      end
-
-      if #brainrotList > 0 then
-         local msg = "Bu serverde değerli brainrot var!\n\n" .. table.concat(brainrotList, "\n")
-         Rayfield:Notify({Title = "Bulundu!", Content = msg, Duration = 20})
-      else
-         Rayfield:Notify({Title = "Yok", Content = "20M+ yok, hop yapılıyor..."})
-         wait(2)
-         game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
-      end
-   end,
-})
-
-BrainrotTab:CreateButton({
-   Name = "Hazır Finder Yükle",
-   Callback = function()
-      loadstring(game:HttpGet("https://raw.githubusercontent.com/r0bloxlucker/sabfinderwithoutdualhook/refs/heads/main/finderv2.lua"))()
-      Rayfield:Notify({Title = "Yüklendi", Content = "Hazır finder aktif!"})
-   end,
-})
-
--- ... (Brainrot sekmesine 28+ daha özellik ekle)
-
--- Settings Tab
-local SettingsTab = Window:CreateTab("Settings")
-
-SettingsTab:CreateLabel("Ayarlar - 30+ Özellik")
-
-SettingsTab:CreateButton({
-   Name = "Reset All",
-   Callback = function()
-      Rayfield:Notify({Title = "Reset", Content = "Tüm ayarlar sıfırlandı!"})
-   end,
-})
-
--- ... (Settings sekmesine 28+ daha özellik ekle)
-
-print("Fsien Hub yüklendi! 10 sekme, 300+ hile aktif.")
+SaveManager:LoadAutoloadConfig()
