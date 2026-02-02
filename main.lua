@@ -1,10 +1,17 @@
--- FsienHub | Steal a Brainrot ULTIMATE 2026 (Keyless, Kavo UI)
--- Tüm çalışan script'lerden esinlenildi: Chilli Hub, FrostWare, MODDED, Moon Hub vs.
--- Bo3.gg & Pastebin 2026 güncel | ProximityPrompt auto steal + farm + fly + ESP + daha fazla
--- Undetected, mobile/PC uyumlu (Delta, Arceus X, Xeno)
+-- FsienHub | Steal a Brainrot Ultimate 2026 (Keyless, DrRay UI)
+-- Tüm çalışan script'lerden esinlenildi: auto steal, farm, fly, ESP + daha fazla
+-- Undetected, mobile/PC uyumlu (Delta, Arceus X, Fluxus)
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("FsienHub - Steal a Brainrot 🧠💀", "DarkTheme")
+local DrRayLibrary = loadstring(game:HttpGet("https://raw.githubusercontent.com/AZYsGithub/DrRay-UI-Library/main/DrRay.lua"))()
+
+local window = DrRayLibrary:Load("FsienHub - Steal a Brainrot 🧠💀", "Default")  -- UI penceresi
+
+-- Tabs
+local mainTab = DrRayLibrary:AddTab("Ana")
+local stealTab = DrRayLibrary:AddTab("Steal & Farm")
+local visualTab = DrRayLibrary:AddTab("Görsel")
+local movementTab = DrRayLibrary:AddTab("Hareket")
+local trollTab = DrRayLibrary:AddTab("Troll & Koruma")
 
 -- Globals
 getgenv().AutoSteal = false
@@ -43,7 +50,7 @@ local function FirePrompts(nameFilter, maxDist)
     end
 end
 
--- Auto Steal Loop
+-- Auto Loops
 spawn(function()
     while true do
         if getgenv().AutoSteal then
@@ -60,7 +67,7 @@ spawn(function()
     end
 end)
 
--- Fly Function (BodyVelocity)
+-- Fly
 local FlyConnection
 local function ToggleFly(enabled)
     local char = Player.Character
@@ -69,29 +76,33 @@ local function ToggleFly(enabled)
     
     if enabled then
         local bv = Instance.new("BodyVelocity")
-        bv.MaxForce = Vector3.new(4000, 4000, 4000)
+        bv.MaxForce = Vector3.new(1e9, 1e9, 1e9)
         bv.Velocity = Vector3.new(0, 0, 0)
         bv.Parent = root
         
         FlyConnection = RunService.Heartbeat:Connect(function()
             local cam = Workspace.CurrentCamera
-            local vel = cam.CFrame.LookVector * (UserInputService:IsKeyDown(Enum.KeyCode.W) and 50 or 0)
-            vel = vel + cam.CFrame.RightVector * (UserInputService:IsKeyDown(Enum.KeyCode.D) and 50 or (UserInputService:IsKeyDown(Enum.KeyCode.A) and -50 or 0))
-            vel = vel + Vector3.new(0, (UserInputService:IsKeyDown(Enum.KeyCode.Space) and 50 or (UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) and -50 or 0)), 0)
+            local vel = Vector3.new(0,0,0)
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + (cam.CFrame.LookVector * 50) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - (cam.CFrame.LookVector * 50) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - (cam.CFrame.RightVector * 50) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + (cam.CFrame.RightVector * 50) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.Space) then vel = vel + Vector3.new(0,50,0) end
+            if UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then vel = vel - Vector3.new(0,50,0) end
             bv.Velocity = vel
         end)
     else
         if FlyConnection then FlyConnection:Disconnect() end
-        if root:FindFirstChild("BodyVelocity") then root.BodyVelocity:Destroy() end
+        if root:FindFirstChild("BodyVelocity") then root:FindFirstChild("BodyVelocity"):Destroy() end
     end
 end
 
--- Noclip Loop
+-- Noclip
 spawn(function()
     while true do
         if getgenv().Noclip and Player.Character then
             for _, part in pairs(Player.Character:GetDescendants()) do
-                if part:IsA("BasePart") then
+                if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
                     part.CanCollide = false
                 end
             end
@@ -102,8 +113,8 @@ end)
 
 -- Inf Jump
 UserInputService.JumpRequest:Connect(function()
-    if getgenv().InfJump then
-        Player.Character.Humanoid:ChangeState("Jumping")
+    if getgenv().InfJump and Player.Character then
+        Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
 
@@ -116,7 +127,7 @@ local function ToggleESP(enabled)
             if enabled then
                 if not highlight then
                     highlight = Instance.new("Highlight")
-                    highlight.FillColor = Color3.fromRGB(255, 0, 170)  -- Brainrot pink
+                    highlight.FillColor = Color3.fromRGB(255, 0, 170)
                     highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
                     highlight.Parent = plr.Character
                     ESPHighlights[plr] = highlight
@@ -128,87 +139,82 @@ local function ToggleESP(enabled)
         end
     end
 end
-Players.PlayerRemoving:Connect(function(plr) if ESPHighlights[plr] then ESPHighlights[plr]:Destroy() end end)
 Players.PlayerAdded:Connect(function(plr)
-    plr.CharacterAdded:Connect(function()
+    plr.CharacterAdded:Connect(function(char)
         if getgenv().ESPEnabled then ToggleESP(true) end
     end)
 end)
+Players.PlayerRemoving:Connect(function(plr)
+    if ESPHighlights[plr] then ESPHighlights[plr]:Destroy() end
+end)
 
--- God Mode / Anti Ragdoll
+-- God Mode
 spawn(function()
     while true do
         if getgenv().GodMode and Player.Character then
-            Player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+            Player.Character.Humanoid.Health = Player.Character.Humanoid.MaxHealth
         end
         task.wait(0.1)
     end
 end)
 
--- Anti Kick (AFK)
+-- Anti Kick
 spawn(function()
     while getgenv().AntiKick do
         if Player.Character and Player.Character:FindFirstChild("HumanoidRootPart") then
-            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame + Vector3.new(0,0,0.01)
+            Player.Character.HumanoidRootPart.CFrame = Player.Character.HumanoidRootPart.CFrame * CFrame.new(0, 0, 0.01)
         end
         task.wait(10)
     end
 end)
 
--- Tabs
-local MainTab = Window:NewTab("Ana Özellikler")
-local StealTab = Window:NewTab("Steal & Farm")
-local VisualTab = Window:NewTab("Görsel")
-local MovementTab = Window:NewTab("Hareket")
-local TrollTab = Window:NewTab("Troll & Diğer")
+-- UI Sections
+local mainSection = mainTab:AddSection("FsienHub 2026 - Brainrot Edition")
+mainSection:AddLabel("Auto Steal & Farm Aktif 🧠🔥")
+mainSection:AddButton("Rejoin Server", function()
+    game:GetService("TeleportService"):Teleport(game.PlaceId)
+end)
 
--- Main Tab
-local MainSection = MainTab:NewSection("FsienHub 2026 - Brainrot Kralı")
-MainSection:NewLabel("1M+ Cash / Instant Steal Hazır 🧠💀")
-MainSection:NewButton("Rejoin Server", "Sunucuya yeniden katıl", function() game:GetService("TeleportService"):Teleport(game.PlaceId) end)
-
--- Steal & Farm Tab
-local StealSection = StealTab:NewSection("Auto Steal & Farm")
-StealSection:NewToggle("AutoSteal", "Otomatik Brainrot Çal", function(state) getgenv().AutoSteal = state end)
-StealSection:NewToggle("AutoFarmCash", "Otomatik Para Topla", function(state) getgenv().AutoFarmCash = state end)
-StealSection:NewToggle("AutoLock", "Auto Base Lock", function(state)
+local stealSection = stealTab:AddSection("Steal & Farm")
+stealSection:AddToggle("Auto Steal", false, function(state) getgenv().AutoSteal = state end)
+stealSection:AddToggle("Auto Farm Cash", false, function(state) getgenv().AutoFarmCash = state end)
+stealSection:AddToggle("Auto Lock Base", false, function(state)
     getgenv().AutoLock = state
     if state then FirePrompts("lock") end
 end)
-StealSection:NewButton("Instant Steal All", "Hemen tüm steal'leri yap", function() FirePrompts("steal", 100) end)
+stealSection:AddButton("Instant Steal All", function() FirePrompts("steal", 100) end)
 
--- Visual Tab
-local VisualSection = VisualTab:NewSection("ESP")
-VisualSection:NewToggle("PlayerESP", "Oyuncu & Brainrot ESP", function(state)
+local visualSection = visualTab:AddSection("ESP")
+visualSection:AddToggle("Player & Brainrot ESP", false, function(state)
     getgenv().ESPEnabled = state
     ToggleESP(state)
 end)
 
--- Movement Tab
-local MoveSection = MovementTab:NewSection("Hareket Hızlandırıcı")
-MoveSection:NewToggle("Fly", "Uçma", function(state)
+local movementSection = movementTab:AddSection("Hareket")
+movementSection:AddToggle("Fly", false, function(state)
     getgenv().FlyEnabled = state
     ToggleFly(state)
 end)
-MoveSection:NewToggle("Noclip", "Duvar Geçme", function(state) getgenv().Noclip = state end)
-MoveSection:NewToggle("InfJump", "Sonsuz Zıplama", function(state) getgenv().InfJump = state end)
-MoveSection:NewSlider("Speed", "Hız", 500, 16, function(s) getgenv().SpeedValue = s Player.Character.Humanoid.WalkSpeed = s end)
-MoveSection:NewToggle("Invisible", "Görünmez", function(state)
+movementSection:AddToggle("Noclip", false, function(state) getgenv().Noclip = state end)
+movementSection:AddToggle("Infinite Jump", false, function(state) getgenv().InfJump = state end)
+movementSection:AddSlider("Speed", 16, 500, 50, function(value)
+    getgenv().SpeedValue = value
+    if Player.Character then Player.Character.Humanoid.WalkSpeed = value end
+end)
+movementSection:AddToggle("Invisible", false, function(state)
     getgenv().Invisible = state
     if Player.Character then
         for _, part in pairs(Player.Character:GetChildren()) do
-            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then part.Transparency = state and 1 or 0 end
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Transparency = state and 1 or 0
+            end
         end
     end
 end)
 
--- Troll Tab
-local TrollSection = TrollTab:NewSection("Troll & Koruma")
-TrollSection:NewToggle("GodMode", "Ölümsüz Mod", function(state) getgenv().GodMode = state end)
-TrollSection:NewToggle("AntiKick", "Kick Koruması", function(state) getgenv().AntiKick = state end)
+local trollSection = trollTab:AddSection("Troll & Koruma")
+trollSection:AddToggle("God Mode", false, function(state) getgenv().GodMode = state end)
+trollSection:AddToggle("Anti Kick", true, function(state) getgenv().AntiKick = state end)
 
--- Load & Notify
-Library:ToggleUI()
-game:GetService("StarterGui"):SetCore("SendNotification", {Title="FsienHub Yüklendi!"; Text="Auto Steal & Farm Aktif 🧠🔥"; Duration=5})
-
-print("FsienHub - Steal a Brainrot Çalışıyor | GitHub: FsienHub")
+-- Notify
+DrRayLibrary:Notify("FsienHub Yüklendi", "Script aktif, UI açıldı! 🧠💀", 5)
