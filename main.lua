@@ -1,4 +1,4 @@
--- Fsien Hub - Delta Executor için (Tüm Özellikler Bir Arada - Final Versiyon)
+-- Fsien Hub - Delta Executor için (Tüm Özellikler Bir Arada - Final)
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
@@ -60,7 +60,7 @@ end)
 -- Universal Hileler Tab
 local UniTab = Window:CreateTab("Universal Hileler")
 
--- Mobil Tap Fly (dokunmatik panel)
+-- Mobil Tap Fly
 local flySpeed = 50
 local flying = false
 local flyBV, flyBG, flyConnection
@@ -180,7 +180,7 @@ UniTab:CreateToggle({
    end,
 })
 
--- Fling (düzeltilmiş - sadece başkalarını uzaya atıyor)
+-- Fling (düzeltilmiş)
 local flingActive = false
 UniTab:CreateToggle({
    Name = "Fling (Yakın Oyuncuları Uzaya Fırlat)",
@@ -284,7 +284,7 @@ UniTab:CreateToggle({
    end,
 })
 
--- Aimbot (kilitlenmiş)
+-- Aimbot
 local aimbotTarget = nil
 UniTab:CreateToggle({
    Name = "Aimbot (Kamera Kilitlenir)",
@@ -501,4 +501,4 @@ SabTab:CreateButton({
    end,
 })
 
-print("Fsien Hub yüklendi! Discord mesajı düzeltildi.")
+print("Fsien Hub yüklendi! Tüm özellikler aktif.")
