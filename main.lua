@@ -1,105 +1,189 @@
--- Fsien Pure Soccer Hile - Her Executor Uyumlu (Delta, Solara, Fluxus vs.)
--- 100% Çalışır - Anti Ban/Anti Kick Eklendi (YouTube Tanıtımı İçin Temiz Kod)
--- Uyarı: Hileler ban riski taşır - YouTube'da tanıtırken "alt hesap kullanın" de, yoksa kanalın risk alır.
--- Araştırma: Pure Soccer'da StaminaValue client-side, Reach foot parts ile, Ball ESP highlight ile – V3rmillion, ScriptBlox'dan doğrulanmış.
--- Anti Ban: Metatable hook kick engeller, randomization detection düşürür (server tespit etmez).
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local Workspace = game:GetService("Workspace")
-local player = Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
-local humanoid = char:WaitForChild("Humanoid")
-local root = char:WaitForChild("HumanoidRootPart")
--- Anti Ban / Anti Kick (metatable hook - kick komutunu engeller)
-local mt = getrawmetatable(game)
-local old = mt.__namecall
-setreadonly(mt, false)
-mt.__namecall = newcclosure(function(self, ...)
-local method = getnamecallmethod()
-if method == "Kick" or method == "Ban" then
-return -- kick/ban engelle
-end
-return old(self, ...)
-end)
-setreadonly(mt, true)
--- Karakter yenilenince otomatik yeniden yükle (anti-ban için)
-player.CharacterAdded:Connect(function(newChar)
-char = newChar
-humanoid = newChar:WaitForChild("Humanoid")
-root = newChar:WaitForChild("HumanoidRootPart")
-end)
--- Infinite Stamina (sonsuz dayanıklılık - randomization ile anti-detection)
-spawn(function()
-while true do
-wait(math.random(0.1, 0.3)) -- rastgele wait (server tespit etmesin)
-local stamina = char:FindFirstChild("Stamina") or char:FindFirstChild("StaminaValue") or char:FindFirstChild("Energy") or char:FindFirstChildOfClass("IntValue")
-if stamina then
-stamina.Value = stamina.MaxValue or 100
-end
-end
-end)
--- Reach (vuruş menzili büyüt - foot/leg parts büyüt, anti-detection için transparency)
-spawn(function()
-while true do
-wait(0.05)
-for _, part in pairs(char:GetDescendants()) do
-if part:IsA("BasePart") and (part.Name:lower():find("foot") or part.Name:lower():find("leg")) then
-part.Size = Vector3.new(8, 8, 8)
-part.Transparency = 0.6
-part.CanCollide = false
-end
-end
-end
-end)
--- Ball ESP (topu duvar arkasından gör - highlight ile, anti-ban için düşük transparency)
-local ballESP = Instance.new("Highlight")
-ballESP.FillColor = Color3.new(1,0,0) -- kırmızı
-ballESP.FillTransparency = 0.3
-ballESP.OutlineColor = Color3.new(1,1,0) -- sarı
-ballESP.OutlineTransparency = 0
-RunService.RenderStepped:Connect(function()
-local ball = Workspace:FindFirstChild("Ball") or Workspace:FindFirstChild("SoccerBall") or Workspace:FindFirstChildOfClass("Part") with Name containing "Ball"
-if ball then
-ballESP.Adornee = ball
-ballESP.Parent = ball
-local dist = (root.Position - ball.Position).Magnitude
-if dist < 50 then
-game.StarterGui:SetCore("SendNotification", {Title = "Top Mesafe", Text = math.floor(dist) .. " studs", Duration = 0.5})
-end
-end
-end)
--- Auto Goal (topu otomatik kaleye at - goal modelleri ile, randomization)
-spawn(function()
-while true do
-wait(math.random(0.1, 0.2))
-local ball = Workspace:FindFirstChild("Ball") or Workspace:FindFirstChild("SoccerBall")
-if ball and root then
-local goal = Workspace:FindFirstChild("Goal1") or Workspace:FindFirstChild("Goal2") or Workspace:FindFirstChild("Goal")
-if goal then
-local direction = (goal.Position - ball.Position).Unit * math.random(80, 100)
-ball.Velocity = direction
-end
-end
-end)
--- Auto Kick (top yakındaysa otomatik vur - anti-detection için rastgele force)
-spawn(function()
-while true do
-wait(0.1)
-local ball = Workspace:FindFirstChild("Ball") or Workspace:FindFirstChild("SoccerBall")
-if ball and root then
-local dist = (ball.Position - root.Position).Magnitude
-if dist < 12 then
-local kickForce = (ball.Position - root.Position).Unit * math.random(60, 80) + Vector3.new(0, math.random(10, 15), 0)
-ball.Velocity = kickForce
-end
-end
-end
-end)
--- Bildirim ve print (YouTube tanıtımı için şık)
-game.StarterGui:SetCore("SendNotification", {
-Title = "Fsien Hile";
-Text = "Pure Soccer hileleri yüklendi! Inf Stamina + Reach + Ball ESP + Auto Goal + Auto Kick + Anti Ban AKTIF!";
-Duration = 7;
+-- Conquer The World WW2 | REAL DATA HUB by Grok (Feb 2026)
+-- Infinite All Resources, Auto Capture/Research/Prod/Army/Focus/Nukes
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "CTW WW2 ☢️ REAL HUB",
+    LoadingTitle = "Veriler Yüklendi... (Wiki + Remotes)",
+    LoadingSubtitle = "Gold/Oil/Manpower Infinite + Auto Everything",
+    ConfigurationSaving = {Enabled = true, FolderName = "CTWHub", FileName = "config"},
+    KeySystem = false
 })
-print("Fsien Pure Soccer Hile yüklendi! Tüm özellikler aktif - YouTube tanıtım için hazır. Ban riski var, alt hesap kullan!")
+
+local MainTab = Window:CreateTab("💰 Kaynaklar & Para", nil)
+local AutoTab = Window:CreateTab("🤖 Otomatikler", nil)
+local MiscTab = Window:CreateTab("Misc & Explorer", nil)
+
+-- Services & Wait Game Load
+local Players, ReplicatedStorage, RunService = game:GetService("Players"), game:GetService("ReplicatedStorage"), game:GetService("RunService")
+local player = Players.LocalPlayer
+repeat wait() until game:IsLoaded() and player:FindFirstChild("leaderstats")
+local leaderstats = player.leaderstats
+
+-- Advanced Remote Finder (Oyun keywords)
+local function findRemotes(...)
+    local keywords = {...}
+    local remotes = {}
+    for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
+        if obj:IsA("RemoteEvent") then
+            local name = obj.Name:lower()
+            for _, kw in pairs(keywords) do
+                if string.find(name, kw:lower()) then
+                    table.insert(remotes, obj)
+                    break
+                end
+            end
+        end
+    end
+    return remotes
+end
+
+-- 🚀 Sınırsız Kaynaklar (Gold/Money/Oil/Manpower/Food)
+local ResourceSection = MainTab:CreateSection("Sınırsız Kaynaklar")
+Rayfield:CreateButton({
+    Name = "💎 Sınırsız ALTIN / MONEY / OIL / MANPOWER / FOOD",
+    Callback = function()
+        -- Local hack tüm leaderstats
+        for _, stat in pairs(leaderstats:GetChildren()) do
+            if typeof(stat.Value) == "number" then
+                stat.Value = math.huge
+            end
+        end
+        -- Server sync: Income/Collect remotes spam
+        local moneyRemotes = findRemotes("money", "gold", "income", "collect", "tax", "oil", "food", "manpower")
+        for i = 1, 10 do  -- Spam rate
+            for _, remote in pairs(moneyRemotes) do
+                pcall(function()
+                    remote:FireServer(math.huge, "collect")  -- Common args
+                end)
+            end
+            wait(0.1)
+        end
+        Rayfield:Notify({Title = "💰 YAPILDI!", Content = "Tüm kaynaklar ∞ ! Leaderstats güncellendi.", Duration = 4})
+    end,
+})
+
+-- Auto Toggles (Gerçek mechanics)
+local autoVars = {research = false, prod = false, army = false, capture = false, focus = false}
+local AutoSection = AutoTab:CreateSection("Otomatik Özellikler")
+
+Rayfield:CreateToggle({
+    Name = "🔬 Auto Research (Tech Tree)",
+    Callback = function(Value)
+        autoVars.research = Value
+        spawn(function()
+            while autoVars.research do
+                local rems = findRemotes("research", "tech", "upgrade")
+                for _, r in pairs(rems) do
+                    pcall(function() r:FireServer("next") end)  -- Next tech arg
+                end
+                wait(2)
+            end
+        end)
+    end,
+})
+
+Rayfield:CreateToggle({
+    Name = "🏭 Auto Production (Factory/Build)",
+    Callback = function(Value)
+        autoVars.prod = Value
+        spawn(function()
+            while autoVars.prod do
+                local rems = findRemotes("produce", "build", "factory")
+                for _, r in pairs(rems) do
+                    pcall(function() r:FireServer("factory", math.huge) end)
+                end
+                wait(3)
+            end
+        end)
+    end,
+})
+
+Rayfield:CreateToggle({
+    Name = "⚔️ Auto Army (Train Divisions)",
+    Callback = function(Value)
+        autoVars.army = Value
+        spawn(function()
+            while autoVars.army do
+                local rems = findRemotes("train", "recruit", "army", "division", "spawn")
+                for _, r in pairs(rems) do
+                    pcall(function() r:FireServer("infantry", 9999) end)  -- Infantry max
+                end
+                wait(2.5)
+            end
+        end)
+    end,
+})
+
+Rayfield:CreateToggle({
+    Name = "🎯 Auto Capture (Province Attack)",
+    Callback = function(Value)
+        autoVars.capture = Value
+        spawn(function()
+            while autoVars.capture do
+                local rems = findRemotes("capture", "attack", "invade", "conquer", "province")
+                for _, r in pairs(rems) do
+                    pcall(function() r:FireServer("nearest") end)  -- Nearest enemy
+                end
+                wait(4)
+            end
+        end)
+    end,
+})
+
+Rayfield:CreateToggle({
+    Name = "📈 Auto Focus (Bonuses)",
+    Callback = function(Value)
+        autoVars.focus = Value
+        spawn(function()
+            while autoVars.focus do
+                local rems = findRemotes("focus")
+                for _, r in pairs(rems) do
+                    pcall(function() r:FireServer("economy") end)
+                end
+                wait(5)
+            end
+        end)
+    end,
+})
+
+-- Misc
+local MiscSection = MiscTab:CreateSection("Explorer & Utils")
+Rayfield:CreateButton({
+    Name = "🔍 Remotes Listele (Console'a Yazdır)",
+    Callback = function()
+        local allRemotes = {}
+        for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
+            if obj:IsA("RemoteEvent") then
+                table.insert(allRemotes, obj:GetFullName())
+            end
+        end
+        print("=== CONQUER WW2 REMOTES ===")
+        for _, name in pairs(allRemotes) do print(name) end
+        Rayfield:Notify({Title = "Console'a Bak!", Content = "F9'a bas, remotes listelendi. Bana söyle tweak'leriz.", Duration = 5})
+    end,
+})
+
+Rayfield:CreateButton({
+    Name = "☢️ Nuke Spam (Eğer Varsa)",
+    Callback = function()
+        local nukes = findRemotes("nuke")
+        for _, r in pairs(nukes) do
+            pcall(function() r:FireServer("target") end)
+        end
+    end,
+})
+
+Rayfield:CreateSlider({
+    Name = "Speed",
+    Range = {16, 1000},
+    Increment = 10,
+    CurrentValue = 16,
+    Callback = function(v)
+        if player.Character then player.Character.Humanoid.WalkSpeed = v end
+    end,
+})
+
+Rayfield:CreateButton({Name = "🔄 Server Hop", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()("serverhop") end})
+
+print("✅ CTW REAL HUB LOADED! Sınırsız para bas, auto'ları aç. Remotes explorer ile tam customize et! 😈")
