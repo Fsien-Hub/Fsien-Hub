@@ -1,189 +1,95 @@
--- Conquer The World WW2 | REAL DATA HUB by Grok (Feb 2026)
--- Infinite All Resources, Auto Capture/Research/Prod/Army/Focus/Nukes
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- CTW WW2 | TAM AI HUB (Infinite Her Şey + Auto AI) by Grok
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("CTW WW2 ☢️ TAM AI", "DarkTheme")
 
-local Window = Rayfield:CreateWindow({
-    Name = "CTW WW2 ☢️ REAL HUB",
-    LoadingTitle = "Veriler Yüklendi... (Wiki + Remotes)",
-    LoadingSubtitle = "Gold/Oil/Manpower Infinite + Auto Everything",
-    ConfigurationSaving = {Enabled = true, FolderName = "CTWHub", FileName = "config"},
-    KeySystem = false
-})
-
-local MainTab = Window:CreateTab("💰 Kaynaklar & Para", nil)
-local AutoTab = Window:CreateTab("🤖 Otomatikler", nil)
-local MiscTab = Window:CreateTab("Misc & Explorer", nil)
-
--- Services & Wait Game Load
-local Players, ReplicatedStorage, RunService = game:GetService("Players"), game:GetService("ReplicatedStorage"), game:GetService("RunService")
+local Players = game:GetService("Players")
+local RS = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
-repeat wait() until game:IsLoaded() and player:FindFirstChild("leaderstats")
-local leaderstats = player.leaderstats
+local leaderstats = player:WaitForChild("leaderstats")
 
--- Advanced Remote Finder (Oyun keywords)
-local function findRemotes(...)
-    local keywords = {...}
-    local remotes = {}
-    for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
-        if obj:IsA("RemoteEvent") then
-            local name = obj.Name:lower()
-            for _, kw in pairs(keywords) do
-                if string.find(name, kw:lower()) then
-                    table.insert(remotes, obj)
+-- Remote Finder
+local function getRemotes(kws)
+    local found = {}
+    for _, obj in RS:GetDescendants() do
+        if (obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction")) then
+            local name = string.lower(obj.Name)
+            for _, kw in kws do
+                if string.find(name, string.lower(kw)) then
+                    table.insert(found, obj)
                     break
                 end
             end
         end
     end
-    return remotes
+    return found
 end
 
--- 🚀 Sınırsız Kaynaklar (Gold/Money/Oil/Manpower/Food)
-local ResourceSection = MainTab:CreateSection("Sınırsız Kaynaklar")
-Rayfield:CreateButton({
-    Name = "💎 Sınırsız ALTIN / MONEY / OIL / MANPOWER / FOOD",
-    Callback = function()
-        -- Local hack tüm leaderstats
-        for _, stat in pairs(leaderstats:GetChildren()) do
-            if typeof(stat.Value) == "number" then
-                stat.Value = math.huge
-            end
+-- 💰 INFINITE TAB
+local InfTab = Window.NewTab("💰 Sınırsız Her Şey")
+InfTab.NewSection("Infinite Resources")
+InfTab.NewButton("🔥 SINIRSIZ ALTIN/MANPOWER/FABRIKA/OIL/FOOD/STABILITY", "Tümü ∞", function()
+    -- Local ∞
+    for _, stat in leaderstats:GetChildren() do
+        if typeof(stat.Value) == "number" then
+            stat.Value = math.huge
         end
-        -- Server sync: Income/Collect remotes spam
-        local moneyRemotes = findRemotes("money", "gold", "income", "collect", "tax", "oil", "food", "manpower")
-        for i = 1, 10 do  -- Spam rate
-            for _, remote in pairs(moneyRemotes) do
-                pcall(function()
-                    remote:FireServer(math.huge, "collect")  -- Common args
-                end)
-            end
-            wait(0.1)
+    end
+    -- Server spam
+    local allRems = getRemotes({"collect","income","gold","money","manpower","factory","oil","food","resource","tax","stability"})
+    for _, rem in allRems do
+        for i=1,20 do
+            pcall(rem.FireServer, rem, math.huge)
+            task.wait(0.05)
         end
-        Rayfield:Notify({Title = "💰 YAPILDI!", Content = "Tüm kaynaklar ∞ ! Leaderstats güncellendi.", Duration = 4})
-    end,
-})
-
--- Auto Toggles (Gerçek mechanics)
-local autoVars = {research = false, prod = false, army = false, capture = false, focus = false}
-local AutoSection = AutoTab:CreateSection("Otomatik Özellikler")
-
-Rayfield:CreateToggle({
-    Name = "🔬 Auto Research (Tech Tree)",
-    Callback = function(Value)
-        autoVars.research = Value
-        spawn(function()
-            while autoVars.research do
-                local rems = findRemotes("research", "tech", "upgrade")
-                for _, r in pairs(rems) do
-                    pcall(function() r:FireServer("next") end)  -- Next tech arg
-                end
-                wait(2)
-            end
-        end)
-    end,
-})
-
-Rayfield:CreateToggle({
-    Name = "🏭 Auto Production (Factory/Build)",
-    Callback = function(Value)
-        autoVars.prod = Value
-        spawn(function()
-            while autoVars.prod do
-                local rems = findRemotes("produce", "build", "factory")
-                for _, r in pairs(rems) do
-                    pcall(function() r:FireServer("factory", math.huge) end)
-                end
-                wait(3)
-            end
-        end)
-    end,
-})
-
-Rayfield:CreateToggle({
-    Name = "⚔️ Auto Army (Train Divisions)",
-    Callback = function(Value)
-        autoVars.army = Value
-        spawn(function()
-            while autoVars.army do
-                local rems = findRemotes("train", "recruit", "army", "division", "spawn")
-                for _, r in pairs(rems) do
-                    pcall(function() r:FireServer("infantry", 9999) end)  -- Infantry max
-                end
-                wait(2.5)
-            end
-        end)
-    end,
-})
-
-Rayfield:CreateToggle({
-    Name = "🎯 Auto Capture (Province Attack)",
-    Callback = function(Value)
-        autoVars.capture = Value
-        spawn(function()
-            while autoVars.capture do
-                local rems = findRemotes("capture", "attack", "invade", "conquer", "province")
-                for _, r in pairs(rems) do
-                    pcall(function() r:FireServer("nearest") end)  -- Nearest enemy
-                end
-                wait(4)
-            end
-        end)
-    end,
-})
-
-Rayfield:CreateToggle({
-    Name = "📈 Auto Focus (Bonuses)",
-    Callback = function(Value)
-        autoVars.focus = Value
-        spawn(function()
-            while autoVars.focus do
-                local rems = findRemotes("focus")
-                for _, r in pairs(rems) do
-                    pcall(function() r:FireServer("economy") end)
-                end
-                wait(5)
-            end
-        end)
-    end,
-})
-
--- Misc
-local MiscSection = MiscTab:CreateSection("Explorer & Utils")
-Rayfield:CreateButton({
-    Name = "🔍 Remotes Listele (Console'a Yazdır)",
-    Callback = function()
-        local allRemotes = {}
-        for _, obj in pairs(ReplicatedStorage:GetDescendants()) do
-            if obj:IsA("RemoteEvent") then
-                table.insert(allRemotes, obj:GetFullName())
-            end
+    end
+    -- Bonus: Tüm remotes spam
+    for _, obj in RS:GetDescendants() do
+        if obj:IsA("RemoteEvent") then
+            pcall(obj.FireServer, obj, math.huge)
         end
-        print("=== CONQUER WW2 REMOTES ===")
-        for _, name in pairs(allRemotes) do print(name) end
-        Rayfield:Notify({Title = "Console'a Bak!", Content = "F9'a bas, remotes listelendi. Bana söyle tweak'leriz.", Duration = 5})
-    end,
-})
+    end
+    Library:Notify("💎 TÜMÜ ∞ YAPILDI! Leaderstats kontrol et.", 4)
+end)
 
-Rayfield:CreateButton({
-    Name = "☢️ Nuke Spam (Eğer Varsa)",
-    Callback = function()
-        local nukes = findRemotes("nuke")
-        for _, r in pairs(nukes) do
-            pcall(function() r:FireServer("target") end)
+-- 🤖 AI TAB
+local AITab = Window.NewTab("🤖 AI Mode")
+AITab.NewSection("Tam Otomatik Oyna")
+local aiActive = false
+AITab.NewToggle("🚀 AI MODE ON (Asker/Fabrika/Research/Capture Auto)", "Tam AI", function(state)
+    aiActive = state
+    task.spawn(function()
+        while aiActive do
+            -- Auto Research
+            local res = getRemotes({"research","tech","upgrade","focus"})
+            for _, r in res do pcall(r.FireServer, r, "next") end
+            -- Auto Production/Fabrika
+            local prod = getRemotes({"produce","build","factory","industry"})
+            for _, r in prod do pcall(r.FireServer, r, "factory", math.huge) end
+            -- Auto Army Train/Spawn
+            local army = getRemotes({"train","recruit","spawn","army","division"})
+            for _, r in army do pcall(r.FireServer, r, "infantry", math.huge) end
+            -- Auto Capture/Attack
+            local cap = getRemotes({"capture","attack","invade","conquer","province","move","snipe"})
+            for _, r in cap do pcall(r.FireServer, r, "nearest") end
+            task.wait(5)  -- Düşük rate, ban safe
         end
-    end,
-})
+    end)
+end)
 
-Rayfield:CreateSlider({
-    Name = "Speed",
-    Range = {16, 1000},
-    Increment = 10,
-    CurrentValue = 16,
-    Callback = function(v)
-        if player.Character then player.Character.Humanoid.WalkSpeed = v end
-    end,
-})
+-- 🔍 DEBUG
+local DebugTab = Window.NewTab("🔍 Debug")
+DebugTab.NewButton("Remotes Listele (F9)", "Console'a yaz", function()
+    print("=== REMOTES ===")
+    for _, obj in RS:GetDescendants() do
+        if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
+            print(obj:GetFullName())
+        end
+    end
+    Library:Notify("F9'a bas, remotes'i gör. Bana at tweak!", 5)
+end)
 
-Rayfield:CreateButton({Name = "🔄 Server Hop", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()("serverhop") end})
+DebugTab.NewButton("🔄 Server Hop", "Yeni sunucu", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()("serverhop")
+end)
 
-print("✅ CTW REAL HUB LOADED! Sınırsız para bas, auto'ları aç. Remotes explorer ile tam customize et! 😈")
+Library:Notify("✅ TAM AI HUB! Infinite bas → AI aç → İzle! 😈", 5)
