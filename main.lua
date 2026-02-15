@@ -1,95 +1,53 @@
--- CTW WW2 | TAM AI HUB (Infinite Her Şey + Auto AI) by Grok
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("CTW WW2 ☢️ TAM AI", "DarkTheme")
-
-local Players = game:GetService("Players")
+-- Conquer The World WW2 | KENDİ HİLE - SINIRSIZ GOLD (2026 Fix)
+local player = game.Players.LocalPlayer
+local leaderstats = player:WaitForChild("leaderstats", 15)
 local RS = game:GetService("ReplicatedStorage")
-local player = Players.LocalPlayer
-local leaderstats = player:WaitForChild("leaderstats")
 
--- Remote Finder
-local function getRemotes(kws)
-    local found = {}
-    for _, obj in RS:GetDescendants() do
-        if (obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction")) then
+-- 1. Local infinite (sen görürsün)
+if leaderstats then
+    local gold = leaderstats:FindFirstChild("Gold")
+    if gold and gold:IsA("IntValue") or gold:IsA("NumberValue") then
+        gold.Value = math.huge  -- veya 9999999999999
+        print("Local Gold ∞ yapıldı!")
+    else
+        print("Gold stat bulunamadı! Leaderstats kontrol et.")
+    end
+end
+
+-- 2. Remote spam için finder (oyundaki income/collect remote'ları hedefle)
+local function spamRemotes()
+    local remotes = {}
+    for _, obj in pairs(RS:GetDescendants()) do
+        if obj:IsA("RemoteEvent") then
             local name = string.lower(obj.Name)
-            for _, kw in kws do
-                if string.find(name, string.lower(kw)) then
-                    table.insert(found, obj)
-                    break
-                end
+            if name:find("collect") or name:find("income") or name:find("tax") or name:find("gold") or name:find("resource") or name:find("money") then
+                table.insert(remotes, obj)
+                print("Bulunan remote:", obj.Name)
             end
         end
     end
-    return found
+    
+    if #remotes == 0 then
+        print("Hiç income remote bulunamadı! Tüm remotes'i dene veya F9 bak.")
+        -- Ekstra: Tüm RemoteEvent'leri spam (riskli ama bazen çalışır)
+        for _, obj in pairs(RS:GetDescendants()) do
+            if obj:IsA("RemoteEvent") then
+                table.insert(remotes, obj)
+            end
+        end
+    end
+    
+    -- Spam loop (ban risk düşük tutmak için yavaş)
+    while true do
+        for _, remote in pairs(remotes) do
+            pcall(function()
+                remote:FireServer(999999999999)  -- veya math.huge, argümanı dene
+                -- Alternatif argümanlar dene: remote:FireServer("Gold", 1e12) veya remote:FireServer(player, 999999)
+            end)
+        end
+        wait(1.5)  -- 1.5 sn bekle, spam çok olursa ban gelebilir
+    end
 end
 
--- 💰 INFINITE TAB
-local InfTab = Window.NewTab("💰 Sınırsız Her Şey")
-InfTab.NewSection("Infinite Resources")
-InfTab.NewButton("🔥 SINIRSIZ ALTIN/MANPOWER/FABRIKA/OIL/FOOD/STABILITY", "Tümü ∞", function()
-    -- Local ∞
-    for _, stat in leaderstats:GetChildren() do
-        if typeof(stat.Value) == "number" then
-            stat.Value = math.huge
-        end
-    end
-    -- Server spam
-    local allRems = getRemotes({"collect","income","gold","money","manpower","factory","oil","food","resource","tax","stability"})
-    for _, rem in allRems do
-        for i=1,20 do
-            pcall(rem.FireServer, rem, math.huge)
-            task.wait(0.05)
-        end
-    end
-    -- Bonus: Tüm remotes spam
-    for _, obj in RS:GetDescendants() do
-        if obj:IsA("RemoteEvent") then
-            pcall(obj.FireServer, obj, math.huge)
-        end
-    end
-    Library:Notify("💎 TÜMÜ ∞ YAPILDI! Leaderstats kontrol et.", 4)
-end)
-
--- 🤖 AI TAB
-local AITab = Window.NewTab("🤖 AI Mode")
-AITab.NewSection("Tam Otomatik Oyna")
-local aiActive = false
-AITab.NewToggle("🚀 AI MODE ON (Asker/Fabrika/Research/Capture Auto)", "Tam AI", function(state)
-    aiActive = state
-    task.spawn(function()
-        while aiActive do
-            -- Auto Research
-            local res = getRemotes({"research","tech","upgrade","focus"})
-            for _, r in res do pcall(r.FireServer, r, "next") end
-            -- Auto Production/Fabrika
-            local prod = getRemotes({"produce","build","factory","industry"})
-            for _, r in prod do pcall(r.FireServer, r, "factory", math.huge) end
-            -- Auto Army Train/Spawn
-            local army = getRemotes({"train","recruit","spawn","army","division"})
-            for _, r in army do pcall(r.FireServer, r, "infantry", math.huge) end
-            -- Auto Capture/Attack
-            local cap = getRemotes({"capture","attack","invade","conquer","province","move","snipe"})
-            for _, r in cap do pcall(r.FireServer, r, "nearest") end
-            task.wait(5)  -- Düşük rate, ban safe
-        end
-    end)
-end)
-
--- 🔍 DEBUG
-local DebugTab = Window.NewTab("🔍 Debug")
-DebugTab.NewButton("Remotes Listele (F9)", "Console'a yaz", function()
-    print("=== REMOTES ===")
-    for _, obj in RS:GetDescendants() do
-        if obj:IsA("RemoteEvent") or obj:IsA("RemoteFunction") then
-            print(obj:GetFullName())
-        end
-    end
-    Library:Notify("F9'a bas, remotes'i gör. Bana at tweak!", 5)
-end)
-
-DebugTab.NewButton("🔄 Server Hop", "Yeni sunucu", function()
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()("serverhop")
-end)
-
-Library:Notify("✅ TAM AI HUB! Infinite bas → AI aç → İzle! 😈", 5)
+spawn(spamRemotes)  -- Arka planda çalıştır
+print("SINIRSIZ GOLD SPAM BAŞLADI! Gold artıyorsa server sync oldu. Artmıyorsa remote argümanı yanlış – F9 console'dan remote isimleri at bana.")
