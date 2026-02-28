@@ -1,53 +1,507 @@
--- Conquer The World WW2 | KENDİ HİLE - SINIRSIZ GOLD (2026 Fix)
+-- Moves name and ult
+
+-- Moves 1 Name
+
 local player = game.Players.LocalPlayer
-local leaderstats = player:WaitForChild("leaderstats", 15)
-local RS = game:GetService("ReplicatedStorage")
 
--- 1. Local infinite (sen görürsün)
-if leaderstats then
-    local gold = leaderstats:FindFirstChild("Gold")
-    if gold and gold:IsA("IntValue") or gold:IsA("NumberValue") then
-        gold.Value = math.huge  -- veya 9999999999999
-        print("Local Gold ∞ yapıldı!")
+local playerGui = player.PlayerGui
+
+local hotbar = playerGui:FindFirstChild("Hotbar")
+
+local backpack = hotbar:FindFirstChild("Backpack")
+
+local hotbarFrame = backpack:FindFirstChild("Hotbar")
+
+local baseButton = hotbarFrame:FindFirstChild("1").Base
+
+local ToolName = baseButton.ToolName
+
+
+ToolName.Text = "Name"
+
+-- Moves 2 Name
+
+local player = game.Players.LocalPlayer
+
+local playerGui = player.PlayerGui
+
+local hotbar = playerGui:FindFirstChild("Hotbar")
+
+local backpack = hotbar:FindFirstChild("Backpack")
+
+local hotbarFrame = backpack:FindFirstChild("Hotbar")
+
+local baseButton = hotbarFrame:FindFirstChild("2").Base
+
+local ToolName = baseButton.ToolName
+
+
+ToolName.Text = "Name"
+
+-- Moves 3 Name
+
+local player = game.Players.LocalPlayer
+
+local playerGui = player.PlayerGui
+
+local hotbar = playerGui:FindFirstChild("Hotbar")
+
+local backpack = hotbar:FindFirstChild("Backpack")
+
+local hotbarFrame = backpack:FindFirstChild("Hotbar")
+
+local baseButton = hotbarFrame:FindFirstChild("3").Base
+
+local ToolName = baseButton.ToolName
+
+
+ToolName.Text = "Name"
+
+-- Moves 4 Name
+
+
+local player = game.Players.LocalPlayer
+
+local playerGui = player.PlayerGui
+
+local hotbar = playerGui:FindFirstChild("Hotbar")
+
+local backpack = hotbar:FindFirstChild("Backpack")
+
+local hotbarFrame = backpack:FindFirstChild("Hotbar")
+
+local baseButton = hotbarFrame:FindFirstChild("4").Base
+
+local ToolName = baseButton.ToolName
+
+
+ToolName.Text = "Name"
+
+
+local Players = game:GetService("Players")
+
+local player = Players.LocalPlayer
+
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Moves
+
+-- Move 1 Ani.
+
+local animationId = 12273188754
+
+
+local player = game.Players.LocalPlayer
+
+local character = player.Character or player.CharacterAdded:Wait()
+
+local humanoid = character:WaitForChild("Humanoid")
+
+
+local function onAnimationPlayed(animationTrack)
+
+    if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationId then
+
+
+local p = game.Players.LocalPlayer
+
+local Humanoid = p.Character:WaitForChild("Humanoid")
+
+
+for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
+
+    animTrack:Stop()
+
+end
+
+
+local AnimAnim = Instance.new("Animation")
+
+AnimAnim.AnimationId = "rbxassetid://16945550029"
+
+local Anim = Humanoid:LoadAnimation(AnimAnim)
+
+
+local startTime = 0
+
+
+Anim:Play(0)
+
+Anim:AdjustSpeed(0)
+
+Anim.TimePosition = startTime
+
+Anim:AdjustSpeed(3)
+
+
+    end
+
+end
+
+humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+
+-- Move 2 here
+
+
+local animationId = 12296113986
+
+
+local player = game.Players.LocalPlayer
+
+local character = player.Character or player.CharacterAdded:Wait()
+
+local humanoid = character:WaitForChild("Humanoid")
+
+
+local function onAnimationPlayed(animationTrack)
+
+    if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationId then
+
+
+local p = game.Players.LocalPlayer
+
+local Humanoid = p.Character:WaitForChild("Humanoid")
+
+
+for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
+
+    animTrack:Stop()
+
+end
+
+
+local AnimAnim = Instance.new("Animation")
+
+AnimAnim.AnimationId = "rbxassetid://94395585475029"
+
+local Anim = Humanoid:LoadAnimation(AnimAnim)
+
+
+local startTime = 0
+
+
+Anim:Play()
+
+Anim:AdjustSpeed(3.5)
+
+Anim.TimePosition = startTime
+
+Anim:AdjustSpeed(0.5)
+
+local player = game.Players.LocalPlayer.Character.HumanoidRootPart
+
+player.Anchored = true
+wait(2.2)
+player.Anchored = false
+
+    end
+
+end
+
+humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+
+-- Move 3 here
+
+
+local animationId = 12309835105
+
+
+local player = game.Players.LocalPlayer
+
+local character = player.Character or player.CharacterAdded:Wait()
+
+local humanoid = character:WaitForChild("Humanoid")
+
+
+local function onAnimationPlayed(animationTrack)
+
+    if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationId then
+
+
+local p = game.Players.LocalPlayer
+
+local Humanoid = p.Character:WaitForChild("Humanoid")
+
+
+for _, animTrack in pairs(Humanoid:GetPlayingAnimationTracks()) do
+
+    animTrack:Stop()
+
+end
+
+
+local AnimAnim = Instance.new("Animation")
+
+AnimAnim.AnimationId = "rbxassetid://13376869471"
+
+local Anim = Humanoid:LoadAnimation(AnimAnim)
+
+
+local startTime = 0
+
+
+Anim:Play()
+
+Anim:AdjustSpeed(1)
+
+Anim.TimePosition = startTime
+
+Anim:AdjustSpeed(0.6)
+
+    end
+
+end
+
+humanoid.AnimationPlayed:Connect(onAnimationPlayed)
+
+-- Move 4 here
+
+local humanoaid = game.Players.LocalPlayer.Character.Humanoid
+ 
+local animationid = 12351854556 -- replace this with your original id
+ 
+local replacement = 116153572280464 -- replace this with the animation replacing original id
+ 
+local function outpuzt(animationTrack)
+   if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationid then
+        animationTrack:Stop()
+        local replaceplacement = Instance.new("Animation")
+        replaceplacement.AnimationId = "rbxassetid://" .. replacement
+ 
+        local whatelse = humanoaid:LoadAnimation(replaceplacement)
+ 
+        whatelse:Play()
+        whatelse:AdjustSpeed(1)
+   end
+end
+
+humanoaid.AnimationPlayed:Connect(outpuzt)
+
+local humanoaid = game.Players.LocalPlayer.Character.Humanoid
+ 
+local animationid = 13603396939 -- replace this with your original id
+ 
+local replacement = 18896124320 -- replace this with the animation replacing original id
+ 
+local function outpuzt(animationTrack)
+   if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationid then
+        animationTrack:Stop()
+        local replaceplacement = Instance.new("Animation")
+        replaceplacement.AnimationId = "rbxassetid://" .. replacement
+ 
+        local whatelse = humanoaid:LoadAnimation(replaceplacement)
+ 
+        whatelse:Play()
+        whatelse:AdjustSpeed(1)
+   end
+end
+ 
+humanoaid.AnimationPlayed:Connect(outpuzt)
+
+player.CharacterAdded:Connect(function(newCharacter)
+
+    character = newCharacter
+
+    humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    character.DescendantAdded:Connect(onBodyVelocityAdded)
+
+   
+
+    for _, descendant in pairs(character:GetDescendants()) do
+
+        onBodyVelocityAdded(descendant)
+
+    end
+
+end)
+
+local ultimatename = "Inserte Ult Nombre"
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+local playerGui = player:WaitForChild("PlayerGui") -- dont edit these 3
+local screenGui = playerGui:WaitForChild("ScreenGui") -- dont edit these 3
+local magicHealth = screenGui:WaitForChild("MagicHealth") -- dont edit these 3
+
+local bary = magicHealth.Health -- dont edit this part
+
+local bary2 = bary.Bar.Bar -- dont edit this part
+
+bary2.ImageColor3 = Color3.fromRGB(0, 0, 0)
+
+-- dont edit under this
+
+local textLabel = game.Players.LocalPlayer.PlayerGui.ScreenGui:WaitForChild("MagicHealth"):WaitForChild("TextLabel"):WaitForChild("TextLabel")
+
+textLabel:Destroy()
+
+local textLabel = magicHealth:WaitForChild("TextLabel")
+
+textLabel.FontFace = Font.new("rbxassetid://12187372629", Enum.FontWeight.Regular)
+textLabel.Text = ultimatename
+textLabel.TextSize = 26
+textLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+textLabel.Position = textLabel.Position + UDim2.new(0, 0, 0, -15) -- Move text up
+
+local uistroke = Instance.new("UIStroke")
+uistroke.Parent = textLabel
+uistroke.Thickness = 1
+uistroke.Transparency = 0
+
+local bar = Instance.new("Frame")
+bar.AnchorPoint = Vector2.new(0.5, 1)
+bar.Position = UDim2.new(0.5, 0, 1, 0)
+bar.Size = UDim2.new(1, 0, 1, 0)
+bar.BackgroundTransparency = 0.5
+bar.Parent = magicHealth
+
+local highlighto = Instance.new("UIStroke")
+highlighto.Transparency = 0.4
+highlighto.Thickness = 2
+highlighto.Parent = bar
+
+for _, ez in pairs(bary:GetChildren()) do 
+    if ez.Name == "Bar" then 
+        ez.Parent = magicHealth
     else
-        print("Gold stat bulunamadı! Leaderstats kontrol et.")
+        ez:Destroy()
     end
 end
 
--- 2. Remote spam için finder (oyundaki income/collect remote'ları hedefle)
-local function spamRemotes()
-    local remotes = {}
-    for _, obj in pairs(RS:GetDescendants()) do
-        if obj:IsA("RemoteEvent") then
-            local name = string.lower(obj.Name)
-            if name:find("collect") or name:find("income") or name:find("tax") or name:find("gold") or name:find("resource") or name:find("money") then
-                table.insert(remotes, obj)
-                print("Bulunan remote:", obj.Name)
+bary2.Image = "rbxassetid://78556255932509"
+
+-- Ult Anims
+
+local humanoaid = game.Players.LocalPlayer.Character.Humanoid
+ 
+local animationid = 12460977270 -- replace this with your original id
+ 
+local replacement = 15290930205 -- replace this with the animation replacing original id
+ 
+local function outpuzt(animationTrack)
+   if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationid then
+         animationTrack:Stop()
+         local replaceplacement = Instance.new("Animation")
+         replaceplacement.AnimationId = "rbxassetid://" .. replacement
+      
+         local whatelse = humanoaid:LoadAnimation(replaceplacement)
+      
+         whatelse:Play()
+         whatelse:AdjustSpeed(1)
+   end
+end
+ 
+humanoaid.AnimationPlayed:Connect(outpuzt)
+
+local humanoaid = game.Players.LocalPlayer.Character.Humanoid
+ 
+local animationid = 12463072679 -- replace this with your original id
+ 
+local replacement = 17799224866 -- replace this with the animation replacing original id
+ 
+local function outpuzt(animationTrack)
+   if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationid then
+         animationTrack:Stop()
+         local replaceplacement = Instance.new("Animation")
+         replaceplacement.AnimationId = "rbxassetid://" .. replacement
+      
+         local whatelse = humanoaid:LoadAnimation(replaceplacement)
+      
+         whatelse:Play()
+         whatelse:AdjustSpeed(1)
+   end
+end
+ 
+humanoaid.AnimationPlayed:Connect(outpuzt)
+
+local humanoaid = game.Players.LocalPlayer.Character.Humanoid
+ 
+local animationid = 14057231976 -- replace this with your original id
+ 
+local replacement = 13073745835 -- replace this with the animation replacing original id
+ 
+local function outpuzt(animationTrack)
+   if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationid then
+         animationTrack:Stop()
+         local replaceplacement = Instance.new("Animation")
+         replaceplacement.AnimationId = "rbxassetid://" .. replacement
+      
+         local whatelse = humanoaid:LoadAnimation(replaceplacement)
+      
+         whatelse:Play()
+         whatelse:AdjustSpeed(1)
+   end
+end
+ 
+humanoaid.AnimationPlayed:Connect(outpuzt)
+
+local humanoaid = game.Players.LocalPlayer.Character.Humanoid
+ 
+local animationid = 13630786846 -- replace this with your original id
+ 
+local replacement = 13073745835 -- replace this with the animation replacing original id
+ 
+local function outpuzt(animationTrack)
+   if animationTrack.Animation.AnimationId == "rbxassetid://" .. animationid then
+         animationTrack:Stop()
+         local replaceplacement = Instance.new("Animation")
+         replaceplacement.AnimationId = "rbxassetid://" .. replacement
+      
+         local whatelse = humanoaid:LoadAnimation(replaceplacement)
+      
+         whatelse:Play()
+         whatelse:AdjustSpeed(1)
+   end
+end
+ 
+humanoaid.AnimationPlayed:Connect(outpuzt)
+
+local OriginalName1 = "Water Stream Cutting Fist"
+local OriginalName2 = "The Final Hunt"
+local OriginalName3 = "Rock Splitting Fist"
+local OriginalName4 = "Crushed Rock"
+
+local UltMovesetName1 = "Inserte Nombre"
+local UltMovesetName2 = "Inserte Nombre"
+local UltMovesetName3 = "Inserte Nombre"
+local UltMovesetName4 = "Inserte Nombre"
+
+-- don't change
+local player = game.Players.LocalPlayer
+local playerGui = player.PlayerGui
+local character = player.Character or player.CharacterAdded:Wait() -- Get character
+
+local toolNamesToReplace = {
+    ["1"] = {original = OriginalName1, new = UltMovesetName1},
+    ["2"] = {original = OriginalName2, new = UltMovesetName2},
+    ["3"] = {original = OriginalName3, new = UltMovesetName3},
+    ["4"] = {original = OriginalName4, new = UltMovesetName4}
+}
+
+local function checkAndReplaceToolName()
+    while character.Humanoid.Health > 0 do
+        local hotbar = playerGui:FindFirstChild("Hotbar")
+        if hotbar then
+            local backpack = hotbar:FindFirstChild("Backpack")
+            if backpack then
+                local hotbarFrame = backpack:FindFirstChild("Hotbar")
+                if hotbarFrame then
+                    for buttonName, toolData in pairs(toolNamesToReplace) do
+                        local baseButton = hotbarFrame:FindFirstChild(buttonName) and hotbarFrame[buttonName]:FindFirstChild("Base")
+                        if baseButton then
+                            local toolName = baseButton:FindFirstChild("ToolName")
+                            if toolName and toolName.Text == toolData.original then
+                                toolName.Text = toolData.new
+                            end
+                        end
+                    end
+                end
             end
         end
-    end
-    
-    if #remotes == 0 then
-        print("Hiç income remote bulunamadı! Tüm remotes'i dene veya F9 bak.")
-        -- Ekstra: Tüm RemoteEvent'leri spam (riskli ama bazen çalışır)
-        for _, obj in pairs(RS:GetDescendants()) do
-            if obj:IsA("RemoteEvent") then
-                table.insert(remotes, obj)
-            end
-        end
-    end
-    
-    -- Spam loop (ban risk düşük tutmak için yavaş)
-    while true do
-        for _, remote in pairs(remotes) do
-            pcall(function()
-                remote:FireServer(999999999999)  -- veya math.huge, argümanı dene
-                -- Alternatif argümanlar dene: remote:FireServer("Gold", 1e12) veya remote:FireServer(player, 999999)
-            end)
-        end
-        wait(1.5)  -- 1.5 sn bekle, spam çok olursa ban gelebilir
+        wait()
     end
 end
 
-spawn(spamRemotes)  -- Arka planda çalıştır
-print("SINIRSIZ GOLD SPAM BAŞLADI! Gold artıyorsa server sync oldu. Artmıyorsa remote argümanı yanlış – F9 console'dan remote isimleri at bana.")
+checkAndReplaceToolName()
