@@ -1,45 +1,172 @@
-local player = game.Players.LocalPlayer
+--// Fsien Hub
+--// Orion Library Required
 
--- GUI oluştur
-local screenGui = script.Parent
-local frame = Instance.new("Frame", screenGui)
-frame.Size = UDim2.new(0,300,0,200)
-frame.Position = UDim2.new(0.5,-150,0.5,-100)
-frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
 
-local box = Instance.new("TextBox", frame)
-box.Size = UDim2.new(0.8,0,0,40)
-box.Position = UDim2.new(0.1,0,0.3,0)
-box.PlaceholderText = "Miktar gir"
-box.Text = ""
+local Window = OrionLib:MakeWindow({
+	Name = "Fsien Hub | Conquer UI",
+	HidePremium = false,
+	SaveConfig = false,
+	ConfigFolder = "FsienHub"
+})
 
-local button = Instance.new("TextButton", frame)
-button.Size = UDim2.new(0.8,0,0,40)
-button.Position = UDim2.new(0.1,0,0.6,0)
-button.Text = "Parayı Değiştir"
+--// Services
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-local close = Instance.new("TextButton", frame)
-close.Size = UDim2.new(0,30,0,30)
-close.Position = UDim2.new(1,-35,0,5)
-close.Text = "X"
+--// Mock Data (Replace with your game remotes)
+local PlayerData = {
+	CountriesOwned = {"France", "Germany"},
+	IncomePerMinute = 1250,
+	ArmySize = 5000,
+	Manpower = 8000,
+	Factories = 12,
+	Capital = "Paris"
+}
 
--- Para sadece kendinde değişir
-button.MouseButton1Click:Connect(function()
+--========================--
+-- TERRITORY TRACKER TAB --
+--========================--
 
-	local amount = tonumber(box.Text)
-	if not amount then return end
+local TerritoryTab = Window:MakeTab({
+	Name = "Territory Tracker",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
 
-	local leaderstats = player:FindFirstChild("leaderstats")
-	if not leaderstats then return end
+TerritoryTab:AddParagraph("Owned Nations", table.concat(PlayerData.CountriesOwned, ", "))
 
-	local money = leaderstats:FindFirstChild("Money")
-	if not money then return end
+TerritoryTab:AddButton({
+	Name = "Refresh Territory Data",
+	Callback = function()
+		-- Replace with remote call
+		OrionLib:MakeNotification({
+			Name = "Fsien Hub",
+			Content = "Territory data refreshed.",
+			Time = 3
+		})
+	end
+})
 
-	money.Value = amount
+--========================--
+-- INCOME TAB --
+--========================--
 
-end)
+local IncomeTab = Window:MakeTab({
+	Name = "Economy",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
 
--- Kapatma
-close.MouseButton1Click:Connect(function()
-	screenGui.Enabled = false
-end)
+IncomeTab:AddParagraph("Income Per Minute", "$"..PlayerData.IncomePerMinute)
+
+IncomeTab:AddParagraph("Factories Owned", PlayerData.Factories)
+
+IncomeTab:AddButton({
+	Name = "Check Production Rates",
+	Callback = function()
+		print("Factory production check triggered")
+	end
+})
+
+--========================--
+-- ARMY TAB --
+--========================--
+
+local ArmyTab = Window:MakeTab({
+	Name = "Army Stats",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+ArmyTab:AddParagraph("Army Size", PlayerData.ArmySize)
+ArmyTab:AddParagraph("Manpower", PlayerData.Manpower)
+
+ArmyTab:AddButton({
+	Name = "Compare Closest Rival",
+	Callback = function()
+		OrionLib:MakeNotification({
+			Name = "Army Comparison",
+			Content = "You are stronger than nearest rival.",
+			Time = 3
+		})
+	end
+})
+
+--========================--
+-- TARGET HELPER TAB --
+--========================--
+
+local TargetTab = Window:MakeTab({
+	Name = "Target Helper",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+TargetTab:AddButton({
+	Name = "Find Weaker Neighbors",
+	Callback = function()
+		print("Scanning for weaker enemies...")
+	end
+})
+
+TargetTab:AddParagraph("Nearest Weaker Nation", "Spain (Distance: 320km)")
+
+--========================--
+-- NAVIGATION TAB --
+--========================--
+
+local NavTab = Window:MakeTab({
+	Name = "Navigation",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+NavTab:AddButton({
+	Name = "Teleport to HQ",
+	Callback = function()
+		-- Replace with safe in-game teleport logic
+		print("Teleport requested to HQ")
+	end
+})
+
+NavTab:AddButton({
+	Name = "Teleport to Capital",
+	Callback = function()
+		print("Teleport requested to Capital")
+	end
+})
+
+--========================--
+-- ALERT SYSTEM TAB --
+--========================--
+
+local AlertTab = Window:MakeTab({
+	Name = "Alerts",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+AlertTab:AddButton({
+	Name = "Simulate War Alert",
+	Callback = function()
+		OrionLib:MakeNotification({
+			Name = "⚔ War Declared",
+			Content = "A neighboring nation declared war!",
+			Time = 5
+		})
+	end
+})
+
+AlertTab:AddButton({
+	Name = "Simulate Income Drop",
+	Callback = function()
+		OrionLib:MakeNotification({
+			Name = "⚠ Economy Warning",
+			Content = "Income dropped below average.",
+			Time = 5
+		})
+	end
+})
+
+OrionLib:Init()
