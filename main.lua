@@ -1,172 +1,79 @@
---// Fsien Hub
---// Orion Library Required
+-- FsienHub | Conquer the World AIO
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
-
-local Window = OrionLib:MakeWindow({
-	Name = "Fsien Hub | Conquer UI",
-	HidePremium = false,
-	SaveConfig = false,
-	ConfigFolder = "FsienHub"
+local Window = Rayfield:CreateWindow({
+   Name = "FsienHub | Conquer the World",
+   LoadingTitle = "FsienHub Yükleniyor...",
+   LoadingSubtitle = "by Fsien",
+   ConfigurationSaving = { Enabled = true, FolderName = "FsienHub", FileName = "ConquerData" },
+   KeySystem = false
 })
 
---// Services
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+-- TABLAR
+local MainTab = Window:CreateTab("Genel", nil)
+local FarmTab = Window:CreateTab("Otomatikler", nil)
+local PlayerTab = Window:CreateTab("Oyuncu", nil)
 
---// Mock Data (Replace with your game remotes)
-local PlayerData = {
-	CountriesOwned = {"France", "Germany"},
-	IncomePerMinute = 1250,
-	ArmySize = 5000,
-	Manpower = 8000,
-	Factories = 12,
-	Capital = "Paris"
-}
+-- OYUN DEĞİŞKENLERİ (Buraları RemoteSpy ile bulup güncelle!)
+local RS = game:GetService("ReplicatedStorage")
+local Remotes = RS:FindFirstChild("Remotes") or RS -- Remote klasörünü buraya yaz
+local MoneyEvent = Remotes:FindFirstChild("UpdateMoney") -- ÖRNEK: Remote ismi
+local AttackEvent = Remotes:FindFirstChild("Attack")     -- ÖRNEK: Remote ismi
 
---========================--
--- TERRITORY TRACKER TAB --
---========================--
-
-local TerritoryTab = Window:MakeTab({
-	Name = "Territory Tracker",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+-- ÖZELLİKLER
+MainTab:CreateButton({
+   Name = "Parayı Maksimum Yap",
+   Callback = function()
+      if MoneyEvent then MoneyEvent:FireServer("SetMax") end
+   end,
 })
 
-TerritoryTab:AddParagraph("Owned Nations", table.concat(PlayerData.CountriesOwned, ", "))
-
-TerritoryTab:AddButton({
-	Name = "Refresh Territory Data",
-	Callback = function()
-		-- Replace with remote call
-		OrionLib:MakeNotification({
-			Name = "Fsien Hub",
-			Content = "Territory data refreshed.",
-			Time = 3
-		})
-	end
+FarmTab:CreateToggle({
+   Name = "Otomatik Kaynak Topla",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoCollect = Value
+      task.spawn(function()
+         while _G.AutoCollect do
+            if Remotes:FindFirstChild("Collect") then Remotes.Collect:FireServer() end
+            task.wait(0.5)
+         end
+      end)
+   end,
 })
 
---========================--
--- INCOME TAB --
---========================--
-
-local IncomeTab = Window:MakeTab({
-	Name = "Economy",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+FarmTab:CreateToggle({
+   Name = "Otomatik Fetih (Auto-Conquer)",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoConquer = Value
+      task.spawn(function()
+         while _G.AutoConquer do
+            if AttackEvent then AttackEvent:FireServer("All") end
+            task.wait(1)
+         end
+      end)
+   end,
 })
 
-IncomeTab:AddParagraph("Income Per Minute", "$"..PlayerData.IncomePerMinute)
-
-IncomeTab:AddParagraph("Factories Owned", PlayerData.Factories)
-
-IncomeTab:AddButton({
-	Name = "Check Production Rates",
-	Callback = function()
-		print("Factory production check triggered")
-	end
+PlayerTab:CreateSlider({
+   Name = "Yürüme Hızı",
+   Range = {16, 200},
+   Increment = 1,
+   CurrentValue = 16,
+   Callback = function(Value)
+      game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+   end,
 })
 
---========================--
--- ARMY TAB --
---========================--
-
-local ArmyTab = Window:MakeTab({
-	Name = "Army Stats",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+PlayerTab:CreateButton({
+   Name = "Sonsuz Zıplama",
+   Callback = function()
+      local Humanoid = game.Players.LocalPlayer.Character.Humanoid
+      Humanoid.Changed:connect(function(Prop)
+         if Prop == "Jump" and Humanoid.Jump == true then Humanoid.Jump = true end
+      end)
+   end,
 })
 
-ArmyTab:AddParagraph("Army Size", PlayerData.ArmySize)
-ArmyTab:AddParagraph("Manpower", PlayerData.Manpower)
-
-ArmyTab:AddButton({
-	Name = "Compare Closest Rival",
-	Callback = function()
-		OrionLib:MakeNotification({
-			Name = "Army Comparison",
-			Content = "You are stronger than nearest rival.",
-			Time = 3
-		})
-	end
-})
-
---========================--
--- TARGET HELPER TAB --
---========================--
-
-local TargetTab = Window:MakeTab({
-	Name = "Target Helper",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-
-TargetTab:AddButton({
-	Name = "Find Weaker Neighbors",
-	Callback = function()
-		print("Scanning for weaker enemies...")
-	end
-})
-
-TargetTab:AddParagraph("Nearest Weaker Nation", "Spain (Distance: 320km)")
-
---========================--
--- NAVIGATION TAB --
---========================--
-
-local NavTab = Window:MakeTab({
-	Name = "Navigation",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-
-NavTab:AddButton({
-	Name = "Teleport to HQ",
-	Callback = function()
-		-- Replace with safe in-game teleport logic
-		print("Teleport requested to HQ")
-	end
-})
-
-NavTab:AddButton({
-	Name = "Teleport to Capital",
-	Callback = function()
-		print("Teleport requested to Capital")
-	end
-})
-
---========================--
--- ALERT SYSTEM TAB --
---========================--
-
-local AlertTab = Window:MakeTab({
-	Name = "Alerts",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
-})
-
-AlertTab:AddButton({
-	Name = "Simulate War Alert",
-	Callback = function()
-		OrionLib:MakeNotification({
-			Name = "⚔ War Declared",
-			Content = "A neighboring nation declared war!",
-			Time = 5
-		})
-	end
-})
-
-AlertTab:AddButton({
-	Name = "Simulate Income Drop",
-	Callback = function()
-		OrionLib:MakeNotification({
-			Name = "⚠ Economy Warning",
-			Content = "Income dropped below average.",
-			Time = 5
-		})
-	end
-})
-
-OrionLib:Init()
+Rayfield:LoadConfiguration()
