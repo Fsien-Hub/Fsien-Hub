@@ -1,79 +1,59 @@
--- FsienHub | Conquer the World AIO
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
-local Window = Rayfield:CreateWindow({
-   Name = "FsienHub | Conquer the World",
-   LoadingTitle = "FsienHub Yükleniyor...",
-   LoadingSubtitle = "by Fsien",
-   ConfigurationSaving = { Enabled = true, FolderName = "FsienHub", FileName = "ConquerData" },
-   KeySystem = false
+-- GÜVENLİK/REMOTE AYARLARI (SimpleSpy ile bunları bulmalısın!)
+local RemoteContainer = game:GetService("ReplicatedStorage"):WaitForChild("Remotes") -- Burayı kontrol et
+local EconomyRemote = RemoteContainer:FindFirstChild("UpgradeEconomy") -- Remote ismi
+local MilitaryRemote = RemoteContainer:FindFirstChild("TrainArmy")      -- Remote ismi
+local WarRemote = RemoteContainer:FindFirstChild("AttackTerritory")    -- Remote ismi
+
+local Window = Rayfield:CreateWindow({Name = "FsienHub PRO - AI Manager", LoadingTitle = "AI Yükleniyor...", LoadingSubtitle = "by Fsien"})
+local AIMode = "None"
+local AIActive = false
+
+-- AI DÖNGÜSÜ
+task.spawn(function()
+    while true do
+        if AIActive then
+            if AIMode == "Ekonomi" and EconomyRemote then
+                EconomyRemote:FireServer("AutoUpgrade") -- Örnek: "AutoUpgrade" argümanı
+            elseif AIMode == "Askeri" and MilitaryRemote then
+                MilitaryRemote:FireServer("TrainFull")
+            elseif AIMode == "Savaş" and WarRemote then
+                WarRemote:FireServer("FastAttack")
+            end
+        end
+        task.wait(0.2) -- Sunucuyu yormamak için kısa delay
+    end
+end)
+
+-- UI Ekleme
+local MainTab = Window:CreateTab("AI Yönetimi", nil)
+
+MainTab:CreateDropdown({
+   Name = "AI Modunu Seç",
+   Options = {"Ekonomi", "Askeri", "Savaş"},
+   CurrentOption = "Ekonomi",
+   Callback = function(Option)
+      AIMode = Option
+      print("Mod değişti: " .. Option)
+   end,
 })
 
--- TABLAR
-local MainTab = Window:CreateTab("Genel", nil)
-local FarmTab = Window:CreateTab("Otomatikler", nil)
-local PlayerTab = Window:CreateTab("Oyuncu", nil)
+MainTab:CreateToggle({
+   Name = "AI Yönetimini Başlat",
+   CurrentValue = false,
+   Callback = function(Value)
+      AIActive = Value
+   end,
+})
 
--- OYUN DEĞİŞKENLERİ (Buraları RemoteSpy ile bulup güncelle!)
-local RS = game:GetService("ReplicatedStorage")
-local Remotes = RS:FindFirstChild("Remotes") or RS -- Remote klasörünü buraya yaz
-local MoneyEvent = Remotes:FindFirstChild("UpdateMoney") -- ÖRNEK: Remote ismi
-local AttackEvent = Remotes:FindFirstChild("Attack")     -- ÖRNEK: Remote ismi
-
--- ÖZELLİKLER
+-- Hızlı Erişim (Manuel)
 MainTab:CreateButton({
-   Name = "Parayı Maksimum Yap",
+   Name = "Full Ekonomik Kalkınma (Tek At)",
    Callback = function()
-      if MoneyEvent then MoneyEvent:FireServer("SetMax") end
+      if EconomyRemote then EconomyRemote:FireServer("Max") end
    end,
 })
-
-FarmTab:CreateToggle({
-   Name = "Otomatik Kaynak Topla",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.AutoCollect = Value
-      task.spawn(function()
-         while _G.AutoCollect do
-            if Remotes:FindFirstChild("Collect") then Remotes.Collect:FireServer() end
-            task.wait(0.5)
-         end
-      end)
-   end,
-})
-
-FarmTab:CreateToggle({
-   Name = "Otomatik Fetih (Auto-Conquer)",
-   CurrentValue = false,
-   Callback = function(Value)
-      _G.AutoConquer = Value
-      task.spawn(function()
-         while _G.AutoConquer do
-            if AttackEvent then AttackEvent:FireServer("All") end
-            task.wait(1)
-         end
-      end)
-   end,
-})
-
-PlayerTab:CreateSlider({
-   Name = "Yürüme Hızı",
-   Range = {16, 200},
-   Increment = 1,
-   CurrentValue = 16,
-   Callback = function(Value)
-      game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
-   end,
-})
-
-PlayerTab:CreateButton({
-   Name = "Sonsuz Zıplama",
-   Callback = function()
-      local Humanoid = game.Players.LocalPlayer.Character.Humanoid
-      Humanoid.Changed:connect(function(Prop)
-         if Prop == "Jump" and Humanoid.Jump == true then Humanoid.Jump = true end
-      end)
-   end,
-})
-
-Rayfield:LoadConfiguration()
